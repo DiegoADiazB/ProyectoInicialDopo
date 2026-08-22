@@ -2,6 +2,7 @@ import java.util.HashMap;
 import javax.swing.JOptionPane;
 import java.util.TreeMap;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * This class have the propour to make like a simulator from the proble slotMachine from 
@@ -157,11 +158,64 @@ public class SlotMachine
             }
             wheels.get(wheel).changeSymbol(newColor);
         }
+        if (isJackpot()) {
+            body[0].changeColor("yellow");
+        }
+        else {
+            body[0].changeColor("lightGray");
+        }
     }
     
     public void spin() {
         for (Integer key : wheels.keySet()) {
             spin(key);
         }
+        if (isJackpot()) {
+            body[0].changeColor("yellow");
+        }
+        else {
+            body[0].changeColor("lightGray");
+        }
     }
+    
+    public String[] symbols() {
+        String[] symbols = new String[this.symbols.size()];
+        int j = 0;
+        for (Map.Entry<Integer, Symbol> i : this.symbols.entrySet()) {
+            symbols[j] = i.getValue().getSymbol();
+            j += 1;
+        }
+        return symbols;
+    }
+    
+    public int distinctSymbols() {
+        int distinct = 0;
+        String[] symbols = new String[this.symbols.size()];
+        for (Integer key : wheels.keySet()) {
+            if (!Arrays.asList(symbols).contains(wheels.get(key).getSymbol())) {
+                symbols[distinct] = wheels.get(key).getSymbol();
+                distinct += 1;
+            }
+        }
+        return distinct;
+    }
+    
+    public boolean isJackpot() {
+        boolean jackpot = false;
+        if (distinctSymbols() == 1) {
+            jackpot = true;
+        }
+        return jackpot;
+    }
+    
+    public String[] configuration() {
+        String[] conf = new String[wheels.size()];
+        int j = 0;
+        for (Integer key : wheels.keySet()) {
+            conf[j] = wheels.get(key).getSymbol();
+            j += 1;
+        }        
+        return conf;
+    }
+    
 }
