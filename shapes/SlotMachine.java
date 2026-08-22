@@ -41,6 +41,11 @@ public class SlotMachine
         handle.changeColor("red");
         wheels = new HashMap<>();
         symbols = new TreeMap<>();
+        body[0].makeVisible();
+        body[1].makeVisible();
+        body[2].makeVisible();
+        body[3].makeVisible();
+        handle.makeVisible();
     }
     
     public void addWheel(int pos) {
@@ -94,26 +99,22 @@ public class SlotMachine
     public void delSymbol(String symbol) {
         boolean band = false;
         int pos = -1;
-        String color = "white";
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
-            if (band) {
-                if (symbols.higherKey(pos) != null) {
-                    color = symbols.get(symbols.higherKey(pos)).getSymbol();
-                }
-                break;
-            }
             if (symbol == i.getValue().getSymbol()) {
                 band = true;
                 pos = i.getKey();
+                break;
             }
         }
         if (band) {
-            if (symbols.firstKey() != pos && color == "white") {
-                color = symbols.get(symbols.firstKey()).getSymbol();
-            }
             for (Integer key : wheels.keySet()) {
                 if (symbol == wheels.get(key).getSymbol()) {
-                    wheels.get(key).changeSymbol(color);
+                    spin(key);
+                }
+            }
+            if (symbols.size() == 1) {
+                for (Integer key : wheels.keySet()) {
+                    wheels.get(key).changeSymbol("white");
                 }
             }
             symbols.remove(pos);
@@ -123,5 +124,44 @@ public class SlotMachine
         }
     }
     
+    public void placeSymbol(int wheel, String symbol) {
+        boolean band = false;
+        for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
+            if (symbol == i.getValue().getSymbol()) {
+                band = true;
+                break;
+            }
+        }
+        if (band && wheels.containsKey(wheel)) {
+            wheels.get(wheel).changeSymbol(symbol);
+        }
+    }
     
+    public void spin(int wheel) {
+        String color;
+        String newColor;
+        int pos = -1;
+        if (wheels.containsKey(wheel) && symbols.size() != 0) {
+            color = wheels.get(wheel).getSymbol();
+            for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
+                if (color == i.getValue().getSymbol()) {
+                    pos = i.getKey();
+                    break;
+                }
+            }
+            if (symbols.higherKey(pos) != null) {
+                newColor = symbols.get(symbols.higherKey(pos)).getSymbol();
+            }
+            else {
+                newColor = symbols.get(symbols.firstKey()).getSymbol();
+            }
+            wheels.get(wheel).changeSymbol(newColor);
+        }
+    }
+    
+    public void spin() {
+        for (Integer key : wheels.keySet()) {
+            spin(key);
+        }
+    }
 }

@@ -34,6 +34,11 @@ public class Wheel
         sym.moveVertical(44);
         sym.moveHorizontal(40);
         sym.changeColor("white");
+        body[0].makeVisible();
+        body[1].makeVisible();
+        body[2].makeVisible();
+        body[3].makeVisible();
+        sym.makeVisible();
     }
     
     public void moveVertical(int y) {
