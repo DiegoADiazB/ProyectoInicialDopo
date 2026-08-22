@@ -18,26 +18,26 @@ public class SlotMachine
      */
     public SlotMachine(){
         body[0] = new Rectangle();
-        body[0].changeSize(150,220);
-        body[0].changeColor("blue");
+        body[0].changeSize(600,1100);
+        body[0].changeColor("lightGray");
         body[1] = new Rectangle();
-        body[1].changeSize(20,200);
-        body[1].moveVertical(150);
-        body[1].moveHorizontal(10);
-        body[1].changeColor("black");
+        body[1].changeSize(80,1000);
+        body[1].moveVertical(600);
+        body[1].moveHorizontal(50);
+        body[1].changeColor("darkGray");
         body[2] = new Rectangle();
-        body[2].changeSize(10,30);
-        body[2].moveVertical(70);
-        body[2].moveHorizontal(220);
-        body[2].changeColor("black");
+        body[2].changeSize(40,140);
+        body[2].moveVertical(300);
+        body[2].moveHorizontal(1100);
+        body[2].changeColor("darkGray");
         body[3] = new Rectangle();
-        body[3].changeSize(30,10);
-        body[3].moveVertical(45);
-        body[3].moveHorizontal(240);
-        body[3].changeColor("black");
-        handle.changeSize(30);
-        handle.moveVertical(20);
-        handle.moveHorizontal(230);
+        body[3].changeSize(120,40);
+        body[3].moveVertical(180);
+        body[3].moveHorizontal(1200);
+        body[3].changeColor("darkGray");
+        handle.changeSize(120);
+        handle.moveVertical(80);
+        handle.moveHorizontal(1160);
         handle.changeColor("red");
     }
     
