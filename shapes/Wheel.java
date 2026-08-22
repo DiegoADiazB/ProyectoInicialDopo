@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import javax.swing.JOptionPane;
 /**
  * Write a description of class Wheel here.
  * 
@@ -7,7 +7,6 @@ import java.util.ArrayList;
  */
 public class Wheel
 {
-    private ArrayList<String> Colores;
     private Rectangle[] body = new Rectangle[4];
     private Circle sym = new Circle();
     
@@ -35,11 +34,6 @@ public class Wheel
         sym.moveVertical(44);
         sym.moveHorizontal(40);
         sym.changeColor("white");
-        body[0].makeVisible();
-        body[1].makeVisible();
-        body[2].makeVisible();
-        body[3].makeVisible();
-        sym.makeVisible();
     }
     
     public void moveVertical(int y) {
@@ -68,11 +62,11 @@ public class Wheel
     public void spin(){
         
     }
-    private void addSymbol(String color){
-        
+    public void changeSymbol(String color) {
+        sym.changeColor(color);
     }
-    private void delSymbol(String color){
-        
+    public String getSymbol() {
+        return sym.getColor();
     }
     public boolean isActionOk(boolean ok){
         return true;

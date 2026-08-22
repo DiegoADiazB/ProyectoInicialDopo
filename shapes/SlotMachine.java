@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 import java.util.TreeMap;
+import java.util.Map;
 
 /**
  * This class have the propour to make like a simulator from the proble slotMachine from 
@@ -13,8 +14,8 @@ public class SlotMachine
     
     private Rectangle[] body = new Rectangle[4];
     private Circle handle = new Circle();
-    private HashMap <Integer, Wheel> wheels = new HashMap<>();
-    private TreeMap <Integer, Symbol> symbols = new TreeMap<>();
+    private HashMap <Integer, Wheel> wheels;
+    private TreeMap <Integer, Symbol> symbols;
     
     public SlotMachine(){
         for (int i = 0; i < 4; i++) {
@@ -38,11 +39,8 @@ public class SlotMachine
         handle.moveVertical(80);
         handle.moveHorizontal(1160);
         handle.changeColor("red");
-        body[0].makeVisible();
-        body[1].makeVisible();
-        body[2].makeVisible();
-        body[3].makeVisible();
-        handle.makeVisible();
+        wheels = new HashMap<>();
+        symbols = new TreeMap<>();
     }
     
     public void addWheel(int pos) {
@@ -50,6 +48,9 @@ public class SlotMachine
             wheels.put(pos, new Wheel());
             wheels.get(pos).moveVertical((int) (pos-1)/10);
             wheels.get(pos).moveHorizontal((pos-1)%10);
+            if (symbols.size() != 0) {
+                wheels.get(pos).changeSymbol(symbols.get(symbols.firstKey()).getSymbol());
+            }
         }
         else {
             JOptionPane.showMessageDialog(null, "This wheel has already been created.");
@@ -67,6 +68,60 @@ public class SlotMachine
     }
     
     public void addSymbol(int pos, String color) {
-
+        boolean band = false;
+        for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
+            if (color == i.getValue().getSymbol()) {
+                band = true;
+                break;
+            }
+        }
+        if (!symbols.containsKey(pos) && !band) {
+            symbols.put(pos, new Symbol(color));
+            if (symbols.size() == 1) {
+                for (Integer key : wheels.keySet()) {
+                    wheels.get(key).changeSymbol(color);
+                }
+            }
+        }
+        else if (symbols.containsKey(pos)) {
+            JOptionPane.showMessageDialog(null, "A symbol already exists in this position.");
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "This symbol already exists in any position.");
+        }
     }
+
+    public void delSymbol(String symbol) {
+        boolean band = false;
+        int pos = -1;
+        String color = "white";
+        for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
+            if (band) {
+                if (symbols.higherKey(pos) != null) {
+                    color = symbols.get(symbols.higherKey(pos)).getSymbol();
+                }
+                break;
+            }
+            if (symbol == i.getValue().getSymbol()) {
+                band = true;
+                pos = i.getKey();
+            }
+        }
+        if (band) {
+            if (symbols.firstKey() != pos && color == "white") {
+                color = symbols.get(symbols.firstKey()).getSymbol();
+            }
+            for (Integer key : wheels.keySet()) {
+                if (symbol == wheels.get(key).getSymbol()) {
+                    wheels.get(key).changeSymbol(color);
+                }
+            }
+            symbols.remove(pos);
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "This symbol don't exists in any position.");
+        }
+    }
+    
+    
 }

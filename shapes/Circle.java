@@ -165,6 +165,8 @@ public class Circle{
         draw();
     }
 
-
+    public String getColor() {
+        return color;
+    }
 
 }
