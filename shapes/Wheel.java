@@ -34,11 +34,6 @@ public class Wheel
         sym.moveVertical(44);
         sym.moveHorizontal(40);
         sym.changeColor("white");
-        body[0].makeVisible();
-        body[1].makeVisible();
-        body[2].makeVisible();
-        body[3].makeVisible();
-        sym.makeVisible();
     }
     
     public void moveVertical(int y) {
@@ -55,25 +50,26 @@ public class Wheel
         sym.moveHorizontal(x*109);
     }
     
-    private void makeWheel(int x){
-        
-    }
     public void makeVisible(){
-        
+        body[0].makeVisible();
+        body[1].makeVisible();
+        body[2].makeVisible();
+        body[3].makeVisible();
+        sym.makeVisible();
     }
+    
     public void makeInvisible(){
-        
+        body[0].makeInvisible();
+        body[1].makeInvisible();
+        body[2].makeInvisible();
+        body[3].makeInvisible();
+        sym.makeInvisible();
     }
-    public void spin(){
-        
-    }
+
     public void changeSymbol(String color) {
         sym.changeColor(color);
     }
     public String getSymbol() {
         return sym.getColor();
-    }
-    public boolean isActionOk(boolean ok){
-        return true;
     }
 }

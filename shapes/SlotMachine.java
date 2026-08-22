@@ -42,11 +42,6 @@ public class SlotMachine
         handle.changeColor("red");
         wheels = new HashMap<>();
         symbols = new TreeMap<>();
-        body[0].makeVisible();
-        body[1].makeVisible();
-        body[2].makeVisible();
-        body[3].makeVisible();
-        handle.makeVisible();
     }
     
     public void addWheel(int pos) {
@@ -218,4 +213,34 @@ public class SlotMachine
         return conf;
     }
     
+    public void makeVisible() {
+        body[0].makeVisible();
+        body[1].makeVisible();
+        body[2].makeVisible();
+        body[3].makeVisible();
+        handle.makeVisible();
+        for (Integer key : wheels.keySet()) {
+            wheels.get(key).makeVisible();
+        } 
+    }
+    
+    public void makeInvisible() {
+        body[0].makeInvisible();
+        body[1].makeInvisible();
+        body[2].makeInvisible();
+        body[3].makeInvisible();
+        handle.makeInvisible();
+        for (Integer key : wheels.keySet()) {
+            wheels.get(key).makeInvisible();
+        } 
+    }
+    
+    public void exit(){
+        makeInvisible();
+        System.exit(0);
+    }
+    
+    public boolean ok() {
+        return true;
+    }
 }
