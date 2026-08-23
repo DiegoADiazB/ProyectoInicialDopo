@@ -1,23 +1,56 @@
-import java.util.HashMap;
 import javax.swing.JOptionPane;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.Arrays;
 
 /**
- * This class have the propour to make like a simulator from the proble slotMachine from 
+ * The SlotMachine class represents a slot machine composed of a body,
+ * a lever handle, a set of wheels, and a set of symbols.
+ * <p>
+ * The machine's shape is built from four rectangles and a circle
+ * representing the lever handle. Wheels and symbols are stored in
+ * separate TreeMaps, indexed by their position, which allows the
+ * machine to manage, add, remove, and update them individually or
+ * as a whole.
+ * <p>
+ * The class also provides functionality to spin individual wheels or
+ * all wheels at once, place specific symbols on a wheel, and check
+ * whether a jackpot condition has been reached (i.e. when all wheels
+ * display the same symbol).
  *
- * @author Juan Diego Cardozo Beltrán - Diego Alejandro Díaz Boada
- * @version 21/08/26 
+ * @author Juan Diego Cardozo Beltrán
+ * @author Diego Alejandro Díaz Boada
+ * @version 22/08/26
  */
 public class SlotMachine
 {
-    
+    /**
+     * The four rectangles that make up the shape/body of the slot machine.
+     */
     private Rectangle[] body = new Rectangle[4];
+    
+    /**
+     * The circle representing the lever handle of the slot machine.
+     */
     private Circle handle = new Circle();
-    private HashMap <Integer, Wheel> wheels;
+    
+    /**
+     * Stores the wheels of the slot machine, indexed by their position.
+     */
+    private TreeMap <Integer, Wheel> wheels;
+    
+    /**
+     * Stores the symbols available for the slot machine, indexed by their
+     * position.
+     */
     private TreeMap <Integer, Symbol> symbols;
     
+    /**
+     * Constructs a new SlotMachine.
+     * Initializes the machine's shape using an array of 4 rectangles and a
+     * circle representing the lever handle. Also initializes the TreeMap
+     * used to store the symbols and the TreeMap used to store the wheels.
+     */
     public SlotMachine(){
         for (int i = 0; i < 4; i++) {
             body[i] = new Rectangle();
@@ -40,13 +73,22 @@ public class SlotMachine
         handle.moveVertical(80);
         handle.moveHorizontal(1160);
         handle.changeColor("red");
-        wheels = new HashMap<>();
+        wheels = new TreeMap<>();
         symbols = new TreeMap<>();
         if (ok()) {
             JOptionPane.showMessageDialog(null, "The slot machine was created.");
         }
     }
     
+    /**
+     * Adds a new wheel to the slot machine at the given position.
+     * The wheel is only created if the position is between 1 and 50
+     * (inclusive) and no other wheel already exists at that position.
+     * If there are existing symbols when the wheel is created, the wheel
+     * is assigned (colored with) the symbol with the lowest position.
+     *
+     * @param pos the position where the new wheel will be placed
+     */
     public void addWheel(int pos) {
         if (! wheels.containsKey(pos) && pos <= 50 && pos >= 1) {
             wheels.put(pos, new Wheel());
@@ -65,6 +107,12 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Removes an existing wheel from the slot machine.
+     * The wheel is removed from the TreeMap that stores the wheels.
+     *
+     * @param pos the position of the wheel to be removed
+     */
     public void delWheel(int pos) {
         if (wheels.containsKey(pos)) {
             wheels.get(pos).makeInvisible();
@@ -78,6 +126,15 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Adds a new symbol to the slot machine.
+     * The symbol is stored in the TreeMap at the given position and is
+     * created using the specified color. If this is the first symbol
+     * created, it is assigned to all existing wheels.
+     *
+     * @param pos   the position at which the symbol will be stored
+     * @param color the color assigned to the new symbol
+     */
     public void addSymbol(int pos, String color) {
         boolean band = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
@@ -107,7 +164,16 @@ public class SlotMachine
             JOptionPane.showMessageDialog(null, "This symbol already exists in any position.");
         }
     }
-
+    
+    /**
+     * Removes a symbol from the slot machine.
+     * Searches the TreeMap for a symbol matching the given color. If found,
+     * its position is stored and every wheel currently displaying that
+     * symbol is spun. If it was the last remaining symbol, all wheels are
+     * left without a symbol (set to white).
+     *
+     * @param symbol the color of the symbol to be removed
+     */
     public void delSymbol(String symbol) {
         boolean band = false;
         int pos = -1;
@@ -139,6 +205,17 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Places a symbol on a specific wheel.
+     * Verifies that both the wheel and the symbol exist in their
+     * corresponding data structures before assigning the symbol to the
+     * wheel. Afterwards, checks whether the jackpot conditions have been
+     * met in order to activate it (changing the machine's color to
+     * indicate the new state).
+     *
+     * @param wheel  the position of the wheel to update
+     * @param symbol the color of the symbol to place on the wheel
+     */
     public void placeSymbol(int wheel, String symbol) {
         boolean band = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
@@ -171,6 +248,14 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Spins a single wheel.
+     * If the wheel exists, it is assigned the next symbol in the symbol
+     * sequence. Afterwards, checks whether the jackpot has been achieved
+     * in order to update the machine's state.
+     *
+     * @param wheel the position of the wheel to spin
+     */
     public void spin(int wheel) {
         String color;
         int pos = -1;
@@ -202,6 +287,13 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Spins all the wheels in the slot machine.
+     * Iterates through every wheel and spins it. Once all wheels have
+     * finished spinning, checks whether the jackpot has been achieved in
+     * order to update the machine's state.
+     */
+
     public void spin() {
         if (wheels.size() == 0) {
             for (Integer key : wheels.keySet()) {
@@ -222,6 +314,13 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Returns all the possible symbols that can appear on the wheels.
+     * These are the symbols currently stored in the TreeMap.
+     *
+     * @return an array containing all the symbols (colors) currently
+     *         registered in the slot machine
+     */
     public String[] symbols() {
         String[] symbols = new String[this.symbols.size()];
         int j = 0;
@@ -232,6 +331,13 @@ public class SlotMachine
         return symbols;
     }
     
+    /**
+     * Counts how many distinct symbols are currently assigned among all
+     * the wheels. If there are no wheels to check, returns 0.
+     *
+     * @return the number of distinct symbols found across all wheels,
+     *         or 0 if there are no wheels
+     */
     public int distinctSymbols() {
         int distinct = 0;
         String[] symbols = new String[this.symbols.size()];
@@ -244,6 +350,14 @@ public class SlotMachine
         return distinct;
     }
     
+    /**
+     * Checks whether the slot machine has achieved the jackpot.
+     * Uses the distinctSymbols() method to determine whether there is
+     * only 1 distinct symbol among all the wheels (meaning every wheel
+     * shows the same symbol).
+     *
+     * @return true if all wheels share the same symbol, false otherwise
+     */
     public boolean isJackpot() {
         boolean jackpot = false;
         if (distinctSymbols() == 1) {
@@ -253,6 +367,15 @@ public class SlotMachine
         return jackpot;
     }
     
+    /**
+     * Returns the current configuration of the slot machine.
+     * Goes through each wheel and retrieves the symbol (color) currently
+     * assigned to it, ordered from the lowest wheel position to the
+     * highest.
+     *
+     * @return an array with the symbols (colors) of every wheel, ordered
+     *         from the lowest to the highest wheel position
+     */
     public String[] configuration() {
         String[] conf = new String[wheels.size()];
         int j = 0;
@@ -266,6 +389,9 @@ public class SlotMachine
         return conf;
     }
     
+    /**
+     * Makes the slot machine and its components visible.
+     */
     public void makeVisible() {
         body[0].makeVisible();
         body[1].makeVisible();
@@ -275,11 +401,11 @@ public class SlotMachine
         for (Integer key : wheels.keySet()) {
             wheels.get(key).makeVisible();
         }
-        if (ok()) {
-            JOptionPane.showMessageDialog(null, "The slot machine is visible.");
-        }
     }
     
+    /**
+     * Makes the slot machine and its components invisible.
+     */
     public void makeInvisible() {
         body[0].makeInvisible();
         body[1].makeInvisible();
@@ -294,6 +420,10 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Ends the interaction with the slot machine.
+     * Terminates the machine and removes the object.
+     */
     public void exit(){
         makeInvisible();
         if (ok()) {
@@ -302,6 +432,13 @@ public class SlotMachine
         System.exit(0);
     }
     
+    /**
+     * Indicates that the last method call was executed successfully.
+     * This method returns true and is called every time a method is
+     * successfully used.
+     *
+     * @return true, confirming that the operation was executed correctly
+     */
     public boolean ok() {
         return true;
     }

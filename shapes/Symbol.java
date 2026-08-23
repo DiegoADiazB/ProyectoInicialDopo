@@ -7,16 +7,16 @@
  */
 public class Symbol
 {
-    private String x;
+    private String color;
 
     /**
      * Constructor for objects of class Symbol
      */
     public Symbol(String color) {
-        x = color;
+        this.color = color;
     }
     
     public String getSymbol() {
-        return x;
+        return color;
     }
 }
