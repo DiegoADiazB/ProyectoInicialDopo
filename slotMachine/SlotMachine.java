@@ -46,6 +46,11 @@ public class SlotMachine
     private TreeMap <Integer, Symbol> symbols;
     
     /**
+     * Indicate if the app can do the last action.
+     */
+    private boolean ok = true;
+    
+    /**
      * Constructs a new SlotMachine.
      * Initializes the machine's shape using an array of 4 rectangles and a
      * circle representing the lever handle. Also initializes the TreeMap
@@ -75,9 +80,6 @@ public class SlotMachine
         handle.changeColor("red");
         wheels = new TreeMap<>();
         symbols = new TreeMap<>();
-        if (ok()) {
-            JOptionPane.showMessageDialog(null, "The slot machine was created.");
-        }
     }
     
     /**
@@ -90,19 +92,20 @@ public class SlotMachine
      * @param pos the position where the new wheel will be placed
      */
     public void addWheel(int pos) {
+        ok = false;
         if (! wheels.containsKey(pos) && pos <= 50 && pos >= 1) {
             wheels.put(pos, new Wheel());
             wheels.get(pos).moveVertical((int) (pos-1)/10);
             wheels.get(pos).moveHorizontal((pos-1)%10);
+            ok = true;
             if (symbols.size() != 0) {
                 wheels.get(pos).changeSymbol(symbols.get(symbols.firstKey()).getSymbol());
+            }
+            if (ok() && body[0].getIsVisible()) {
                 makeVisible();
             }
-            if (ok()) {
-                JOptionPane.showMessageDialog(null, "The wheel was added.");
-            }
         }
-        else {
+        else if (body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "This wheel cannot be created.");
         }
     }
@@ -114,14 +117,13 @@ public class SlotMachine
      * @param pos the position of the wheel to be removed
      */
     public void delWheel(int pos) {
+        ok = false;
         if (wheels.containsKey(pos)) {
             wheels.get(pos).makeInvisible();
             wheels.remove(pos);
-            if (ok()) {
-                JOptionPane.showMessageDialog(null, "The wheel was deleted.");
-            }
+            ok = true;
         }
-        else {
+        else if (body[0].getIsVisible()){
             JOptionPane.showMessageDialog(null, "This wheel don't exist.");
         }
     }
@@ -143,6 +145,7 @@ public class SlotMachine
                 break;
             }
         }
+        ok = false;
         if (!symbols.containsKey(pos) && !band && pos > 0) {
             symbols.put(pos, new Symbol(color));
             if (symbols.size() == 1) {
@@ -150,17 +153,15 @@ public class SlotMachine
                     wheels.get(key).changeSymbol(color);
                 }
             }
-            if (ok()) {
-                JOptionPane.showMessageDialog(null, "The symbol was added.");
-            }
+            ok = true;
         }
-        else if (symbols.containsKey(pos)) {
+        else if (symbols.containsKey(pos) && body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "A symbol already exists in this position.");
         }
-        else if (pos < 1) {
+        else if (pos < 1 && body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "You only can add symbols in positives positions.");
         }
-        else {
+        else if (body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "This symbol already exists in any position.");
         }
     }
@@ -177,6 +178,7 @@ public class SlotMachine
     public void delSymbol(String symbol) {
         boolean band = false;
         int pos = -1;
+        ok = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
             if (symbol == i.getValue().getSymbol()) {
                 band = true;
@@ -196,11 +198,9 @@ public class SlotMachine
                 }
             }
             symbols.remove(pos);
-            if (ok()) {
-                JOptionPane.showMessageDialog(null, "The symbol was deleted.");
-            }
+            ok = true;
         }
-        else {
+        else if (body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "This symbol don't exists in any position.");
         }
     }
@@ -218,6 +218,7 @@ public class SlotMachine
      */
     public void placeSymbol(int wheel, String symbol) {
         boolean band = false;
+        ok = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
             if (symbol == i.getValue().getSymbol()) {
                 band = true;
@@ -226,24 +227,20 @@ public class SlotMachine
         }
         if (band && wheels.containsKey(wheel)) {
             wheels.get(wheel).changeSymbol(symbol);
-            if (isJackpot()) {
-                makeInvisible();
+            if (isJackpot() && body[0].getIsVisible()) {
                 body[0].changeColor("yellow");
                 makeVisible();
             }
-            else {
-                makeInvisible();
+            else if (body[0].getIsVisible()) {
                 body[0].changeColor("lightGray");
                 makeVisible();
             }
-            if (ok()) {
-                JOptionPane.showMessageDialog(null, "The symbol was changed.");
-            }
+            ok = true;
         }
-        else if (!wheels.containsKey(wheel)) {
+        else if (!wheels.containsKey(wheel) && body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "This wheel don´t exist.");
         }
-        else {
+        else if (body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "This symbol don´t exist.");
         }
     }
@@ -259,6 +256,7 @@ public class SlotMachine
     public void spin(int wheel) {
         String color;
         int pos = -1;
+        ok = false;
         if (wheels.containsKey(wheel) && symbols.size() != 0) {
             color = wheels.get(wheel).getSymbol();
             for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
@@ -273,16 +271,17 @@ public class SlotMachine
                 color = symbols.get(symbols.firstKey()).getSymbol();
             }
             wheels.get(wheel).changeSymbol(color);
-            if (isJackpot() && ok()) {
+            ok = true;
+            if (isJackpot() && body[0].getIsVisible()) {
                 body[0].changeColor("yellow");
                 makeVisible();
             }
-            else {
+            else if (body[0].getIsVisible()) {
                 body[0].changeColor("lightGray");
                 makeVisible();
             }
         }
-        else {
+        else if (body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "This wheel don´t exist or don't exists symbols.");
         }
     }
@@ -295,21 +294,13 @@ public class SlotMachine
      */
 
     public void spin() {
-        if (wheels.size() == 0) {
+        ok = false;
+        if (wheels.size() != 0) {
             for (Integer key : wheels.keySet()) {
                 spin(key);
             }
-            if (isJackpot()) {
-                body[0].changeColor("yellow");
-            }
-            else {
-                body[0].changeColor("lightGray");
-            }
-            if (ok()) {
-                JOptionPane.showMessageDialog(null, "All wheels spin.");
-            }
         }
-        else {
+        else if (body[0].getIsVisible()) {
             JOptionPane.showMessageDialog(null, "In this moment don't exist any wheel to spin.");
         }
     }
@@ -322,6 +313,7 @@ public class SlotMachine
      *         registered in the slot machine
      */
     public String[] symbols() {
+        ok = true;
         String[] symbols = new String[this.symbols.size()];
         int j = 0;
         for (Map.Entry<Integer, Symbol> i : this.symbols.entrySet()) {
@@ -339,6 +331,7 @@ public class SlotMachine
      *         or 0 if there are no wheels
      */
     public int distinctSymbols() {
+        ok = true;
         int distinct = 0;
         String[] symbols = new String[this.symbols.size()];
         for (Integer key : wheels.keySet()) {
@@ -360,6 +353,7 @@ public class SlotMachine
      */
     public boolean isJackpot() {
         boolean jackpot = false;
+        ok = true;
         if (distinctSymbols() == 1) {
             jackpot = true;
             JOptionPane.showMessageDialog(null, "You got a jackpot.");
@@ -383,9 +377,7 @@ public class SlotMachine
             conf[j] = wheels.get(key).getSymbol();
             j += 1;
         }    
-        if (ok()) {
-            JOptionPane.showMessageDialog(null, "This is the configuration from the slot machine.");
-        }
+        ok = true;
         return conf;
     }
     
@@ -401,6 +393,7 @@ public class SlotMachine
         for (Integer key : wheels.keySet()) {
             wheels.get(key).makeVisible();
         }
+        ok = true;
     }
     
     /**
@@ -414,10 +407,8 @@ public class SlotMachine
         handle.makeInvisible();
         for (Integer key : wheels.keySet()) {
             wheels.get(key).makeInvisible();
-        } 
-        if (ok()) {
-            JOptionPane.showMessageDialog(null, "The slot machine is invisible.");
         }
+        ok = true;
     }
     
     /**
@@ -426,6 +417,7 @@ public class SlotMachine
      */
     public void exit(){
         makeInvisible();
+        ok = true;
         if (ok()) {
             JOptionPane.showMessageDialog(null, "You exit from the slot machine.");
         }
@@ -433,13 +425,13 @@ public class SlotMachine
     }
     
     /**
-     * Indicates that the last method call was executed successfully.
-     * This method returns true and is called every time a method is
-     * successfully used.
+     * Indicates whether the last operation performed on the slot machine
+     * was executed successfully.
      *
-     * @return true, confirming that the operation was executed correctly
+     * @return true if the last method call completed successfully,
+     *         false otherwise
      */
     public boolean ok() {
-        return true;
+        return ok;
     }
 }

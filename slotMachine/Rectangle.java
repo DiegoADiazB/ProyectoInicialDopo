@@ -32,6 +32,12 @@ public class Rectangle{
         isVisible = false;
     }
     
+    /**
+     * Return if the rectangule is visible or invisible.
+     */
+    public boolean getIsVisible() {
+        return isVisible;
+    }
 
     /**
      * Make this rectangle visible. If it was already visible, do nothing.
