@@ -1,15 +1,38 @@
 import javax.swing.JOptionPane;
 /**
- * Write a description of class Wheel here.
- * 
- * @author (your name) 
- * @version (a version number or a date)
+ * The Wheel class represents a single wheel/slot within a SlotMachine.
+ * <p>
+ * Each wheel is made up of a set of rectangles that give it its shape,
+ * along with a circle that represents the symbol currently assigned
+ * to it. When a wheel is first created, it has no symbol assigned and
+ * is displayed in white.
+ * <p>
+ * The class provides functionality to position the wheel both
+ * vertically and horizontally within the machine, show or hide the
+ * wheel, and change or retrieve the symbol it currently displays.
+ *
+ * @author Juan Diego Cardozo Beltrán
+ * @author Diego Alejandro Díaz Boada
+ * @version 22/08/26
  */
 public class Wheel
 {
+    /**
+     * The four rectangles that make up the shape of the wheel's slot.
+     */
     private Rectangle[] body = new Rectangle[4];
+    
+    /**
+     * The circle representing the symbol currently displayed on the wheel.
+     */
     private Circle sym = new Circle();
     
+    /**
+     * Constructs a new Wheel.
+     * The wheel is made up of a list of 4 rectangles that give shape to
+     * the slot, and a circle in the middle representing the symbol. Since
+     * the wheel has no symbol assigned at the start, it is left in white.
+     */
     public Wheel(){
         for (int i = 0; i < 4; i++) {
             body[i] = new Rectangle();
@@ -36,6 +59,13 @@ public class Wheel
         sym.changeColor("white");
     }
     
+    /**
+     * Positions the wheel's shapes according to their vertical position
+     * on the machine, moving them enough to leave a 10 pixel vertical
+     * gap between wheels.
+     *
+     * @param y the vertical position to move the wheel to
+     */
     public void moveVertical(int y) {
         for (int i = 0; i < 4; i++) {
             body[i].moveVertical(y*118);
@@ -43,6 +73,13 @@ public class Wheel
         sym.moveVertical(y*118);
     }
     
+    /**
+     * Positions the wheel's shapes according to their horizontal position
+     * on the machine, moving them enough to leave a 10 pixel horizontal
+     * gap between wheels.
+     *
+     * @param x the horizontal position to move the wheel to
+     */
     public void moveHorizontal(int x) {
         for (int i = 0; i < 4; i++) {
             body[i].moveHorizontal(x*109);
@@ -50,6 +87,9 @@ public class Wheel
         sym.moveHorizontal(x*109);
     }
     
+    /**
+     * Makes the wheel visible.
+     */
     public void makeVisible(){
         body[0].makeVisible();
         body[1].makeVisible();
@@ -58,6 +98,9 @@ public class Wheel
         sym.makeVisible();
     }
     
+    /**
+     * Makes the wheel invisible.
+     */
     public void makeInvisible(){
         body[0].makeInvisible();
         body[1].makeInvisible();
@@ -65,10 +108,23 @@ public class Wheel
         body[3].makeInvisible();
         sym.makeInvisible();
     }
-
+    
+    /**
+     * Changes the symbol currently displayed on the wheel.
+     * Changes the color of the circle to the color received as a
+     * parameter.
+     *
+     * @param color the new color to assign to the wheel's symbol
+     */
     public void changeSymbol(String color) {
         sym.changeColor(color);
     }
+    
+    /**
+     * Returns the symbol (color) currently assigned to the wheel.
+     *
+     * @return the color of the symbol currently displayed on the wheel
+     */
     public String getSymbol() {
         return sym.getColor();
     }
