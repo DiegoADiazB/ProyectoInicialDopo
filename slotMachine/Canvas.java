@@ -140,6 +140,8 @@ public class Canvas{
             graphic.setColor(Color.darkGray);
         else if(colorString.equals("lightGray"))
             graphic.setColor(Color.lightGray);
+        else if (colorString.startsWith("#")) 
+            graphic.setColor(Color.decode(colorString));
     }
 
     /**
