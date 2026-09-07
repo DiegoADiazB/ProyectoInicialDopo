@@ -1,4 +1,5 @@
 import javax.swing.JOptionPane;
+import java.util.TreeMap;
 /**
  * The Wheel class represents a single wheel/slot within a SlotMachine.
  * <p>
@@ -27,36 +28,60 @@ public class Wheel
      */
     private Circle sym = new Circle();
     
+    public static final int height = 100;
+    
+    public static final int width = 90;
+    
+    private TreeMap <Integer, Symbol> symbols;
+    
     /**
      * Constructs a new Wheel.
      * The wheel is made up of a list of 4 rectangles that give shape to
      * the slot, and a circle in the middle representing the symbol. Since
      * the wheel has no symbol assigned at the start, it is left in white.
      */
-    public Wheel(){
+    public Wheel(int number, TreeMap<Integer, Symbol> symbols){
+        this.symbols = symbols;
         for (int i = 0; i < 4; i++) {
             body[i] = new Rectangle();
+            body[i].changeColor("darkGray");
+            body[i].moveHorizontal(SlotMachine.interval);
+            body[i].moveVertical(SlotMachine.interval);
         }
-        body[0].changeSize(108, 99);
-        body[0].moveVertical(10);
-        body[0].moveHorizontal(10);
-        body[0].changeColor("darkGray");
-        body[1].changeSize(98, 89);
-        body[1].moveVertical(15);
-        body[1].moveHorizontal(15);
+        body[0].changeSize(height, width);
+        body[1].changeSize(height-10, width-10);
+        body[1].moveVertical(5);
+        body[1].moveHorizontal(5);
         body[1].changeColor("white");
-        body[2].changeSize(20, 99);
-        body[2].moveVertical(10);
-        body[2].moveHorizontal(10);
-        body[2].changeColor("darkGray");
-        body[3].changeSize(20, 99);
-        body[3].moveVertical(98);
-        body[3].moveHorizontal(10);
-        body[3].changeColor("darkGray");
-        sym.changeSize(39);
-        sym.moveVertical(44);
-        sym.moveHorizontal(40);
-        sym.changeColor("white");
+        body[2].changeSize(height/5, width);
+        body[3].changeSize(height/5, width);
+        body[3].moveVertical(height - height/5);
+        sym.changeSize(width/2);
+        sym.moveVertical(height/7 + 3*height/8);
+        sym.moveHorizontal(width/4 + SlotMachine.interval);
+        if (symbols.size() != 0) {
+            sym.changeColor(symbols.get(symbols.firstKey()).getSymbol());
+        }
+        else {
+            sym.changeColor("red");
+        }
+        moveVertical((number-1)/ (SlotMachine.wheelsNumber/SlotMachine.linesOfWheels));
+        moveHorizontal((number-1)% (SlotMachine.wheelsNumber/SlotMachine.linesOfWheels));
+    }
+    
+    public void spin() {
+        int symbolKey = -1;
+        for (Integer key : symbols.keySet()) {
+            if (symbols.get(key).getSymbol() == sym.getColor()) {
+                symbolKey = key;
+            }
+        }
+        if (symbols.higherKey(symbolKey) != null) {
+            placeSymbol(symbols.get(symbols.higherKey(symbolKey)).getSymbol());
+        }
+        else {
+            placeSymbol(symbols.get(symbols.firstKey()).getSymbol());
+        }
     }
     
     /**
@@ -66,11 +91,11 @@ public class Wheel
      *
      * @param y the vertical position to move the wheel to
      */
-    public void moveVertical(int y) {
+    private void moveVertical(int y) {
         for (int i = 0; i < 4; i++) {
-            body[i].moveVertical(y*118);
+            body[i].moveVertical(y*(height + SlotMachine.interval/2));
         }
-        sym.moveVertical(y*118);
+        sym.moveVertical(y*(height + SlotMachine.interval/2));
     }
     
     /**
@@ -80,11 +105,11 @@ public class Wheel
      *
      * @param x the horizontal position to move the wheel to
      */
-    public void moveHorizontal(int x) {
+    private void moveHorizontal(int x) {
         for (int i = 0; i < 4; i++) {
-            body[i].moveHorizontal(x*109);
+            body[i].moveHorizontal(x*(width+ SlotMachine.interval));
         }
-        sym.moveHorizontal(x*109);
+        sym.moveHorizontal(x*(width+ SlotMachine.interval));
     }
     
     /**
@@ -116,7 +141,7 @@ public class Wheel
      *
      * @param color the new color to assign to the wheel's symbol
      */
-    public void changeSymbol(String color) {
+    public void placeSymbol(String color) {
         sym.changeColor(color);
     }
     

@@ -43,12 +43,24 @@ public class SlotMachine
      * Stores the symbols available for the slot machine, indexed by their
      * position.
      */
-    private TreeMap <Integer, Symbol> symbols;
+    public TreeMap <Integer, Symbol> symbols;
     
     /**
      * Indicate if the app can do the last action.
      */
     private boolean ok = true;
+    
+    private boolean isVisible = false;
+    
+    public static final int wheelsNumber = 50;
+    
+    public static final int linesOfWheels = 5;
+    
+    public static final int interval = 20;
+    
+    private static final int height = Wheel.height*linesOfWheels + interval*(linesOfWheels+1);
+    
+    private static final int width =  Wheel.width*(wheelsNumber/linesOfWheels) + interval*((wheelsNumber/linesOfWheels)+1);
     
     /**
      * Constructs a new SlotMachine.
@@ -60,23 +72,23 @@ public class SlotMachine
         for (int i = 0; i < 4; i++) {
             body[i] = new Rectangle();
         }
-        body[0].changeSize(600,1100);
+        body[0].changeSize(height,width);
         body[0].changeColor("lightGray");
-        body[1].changeSize(80,1000);
-        body[1].moveVertical(600);
-        body[1].moveHorizontal(50);
+        body[1].changeSize(height/20,width-2*interval);
+        body[1].moveVertical(height);
+        body[1].moveHorizontal(interval);
         body[1].changeColor("darkGray");
-        body[2].changeSize(40,140);
-        body[2].moveVertical(300);
-        body[2].moveHorizontal(1100);
+        body[2].changeSize(interval*2,width/10);
+        body[2].moveVertical(height/2);
+        body[2].moveHorizontal(width);
         body[2].changeColor("darkGray");
-        body[3].changeSize(120,40);
-        body[3].moveVertical(180);
-        body[3].moveHorizontal(1200);
+        body[3].changeSize(width/10,interval*2);
+        body[3].moveVertical(height/2 - width/10);
+        body[3].moveHorizontal(width - (2*interval) + width/10);
         body[3].changeColor("darkGray");
-        handle.changeSize(120);
-        handle.moveVertical(80);
-        handle.moveHorizontal(1160);
+        handle.changeSize(width/10);
+        handle.moveVertical(height/2 - width/5 + 2*interval);
+        handle.moveHorizontal(width + (width/10-interval*3));
         handle.changeColor("red");
         wheels = new TreeMap<>();
         symbols = new TreeMap<>();
@@ -93,19 +105,14 @@ public class SlotMachine
      */
     public void addWheel(int pos) {
         ok = false;
-        if (! wheels.containsKey(pos) && pos <= 50 && pos >= 1) {
-            wheels.put(pos, new Wheel());
-            wheels.get(pos).moveVertical((int) (pos-1)/10);
-            wheels.get(pos).moveHorizontal((pos-1)%10);
+        if (! wheels.containsKey(pos) && pos <= wheelsNumber && pos >= 1) {
+            wheels.put(pos, new Wheel(pos, symbols));
             ok = true;
-            if (symbols.size() != 0) {
-                wheels.get(pos).changeSymbol(symbols.get(symbols.firstKey()).getSymbol());
-            }
-            if (ok() && body[0].getIsVisible()) {
+            if (ok() && isVisible) {
                 makeVisible();
             }
         }
-        else if (body[0].getIsVisible()) {
+        else if (isVisible) {
             JOptionPane.showMessageDialog(null, "This wheel cannot be created.");
         }
     }
@@ -123,7 +130,7 @@ public class SlotMachine
             wheels.remove(pos);
             ok = true;
         }
-        else if (body[0].getIsVisible()){
+        else if (isVisible){
             JOptionPane.showMessageDialog(null, "This wheel don't exist.");
         }
     }
@@ -138,30 +145,30 @@ public class SlotMachine
      * @param color the color assigned to the new symbol
      */
     public void addSymbol(int pos, String color) {
-        boolean band = false;
+        boolean existSymbol = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
             if (color == i.getValue().getSymbol()) {
-                band = true;
+                existSymbol = true;
                 break;
             }
         }
         ok = false;
-        if (!symbols.containsKey(pos) && !band && pos > 0) {
+        if (!symbols.containsKey(pos) && !existSymbol && pos > 0) {
             symbols.put(pos, new Symbol(color));
             if (symbols.size() == 1) {
-                for (Integer key : wheels.keySet()) {
-                    wheels.get(key).changeSymbol(color);
+                for (Wheel wheel : wheels.values()) {
+                    wheel.placeSymbol(color);
                 }
             }
             ok = true;
         }
-        else if (symbols.containsKey(pos) && body[0].getIsVisible()) {
+        else if (symbols.containsKey(pos) && isVisible) {
             JOptionPane.showMessageDialog(null, "A symbol already exists in this position.");
         }
-        else if (pos < 1 && body[0].getIsVisible()) {
+        else if (pos < 1 && isVisible) {
             JOptionPane.showMessageDialog(null, "You only can add symbols in positives positions.");
         }
-        else if (body[0].getIsVisible()) {
+        else if (isVisible) {
             JOptionPane.showMessageDialog(null, "This symbol already exists in any position.");
         }
     }
@@ -176,32 +183,34 @@ public class SlotMachine
      * @param symbol the color of the symbol to be removed
      */
     public void delSymbol(String symbol) {
-        boolean band = false;
+        boolean existSymbol = false;
         int pos = -1;
         ok = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
             if (symbol == i.getValue().getSymbol()) {
-                band = true;
+                existSymbol = true;
                 pos = i.getKey();
                 break;
             }
         }
-        if (band) {
-            for (Integer key : wheels.keySet()) {
-                if (symbol == wheels.get(key).getSymbol()) {
-                    spin(key);
+        if (existSymbol) {
+            if (symbols.size() == 1) {
+                for (Wheel wheel : wheels.values()) {
+                    wheel.placeSymbol("white");
                 }
             }
-            if (symbols.size() == 1) {
+            else {
                 for (Integer key : wheels.keySet()) {
-                    wheels.get(key).changeSymbol("white");
+                    if (symbol == wheels.get(key).getSymbol()) {
+                        spin(key);
+                    }
                 }
             }
             symbols.remove(pos);
             ok = true;
         }
-        else if (body[0].getIsVisible()) {
-            JOptionPane.showMessageDialog(null, "This symbol don't exists in any position.");
+        else if (isVisible) {
+            JOptionPane.showMessageDialog(null, "This symbol doesn't exists in any position.");
         }
     }
     
@@ -217,31 +226,31 @@ public class SlotMachine
      * @param symbol the color of the symbol to place on the wheel
      */
     public void placeSymbol(int wheel, String symbol) {
-        boolean band = false;
+        boolean existSymbol = false;
         ok = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
             if (symbol == i.getValue().getSymbol()) {
-                band = true;
+                existSymbol = true;
                 break;
             }
         }
-        if (band && wheels.containsKey(wheel)) {
-            wheels.get(wheel).changeSymbol(symbol);
-            if (isJackpot() && body[0].getIsVisible()) {
+        if (existSymbol && wheels.containsKey(wheel)) {
+            wheels.get(wheel).placeSymbol(symbol);
+            if (isJackpot() && isVisible) {
                 body[0].changeColor("yellow");
                 makeVisible();
             }
-            else if (body[0].getIsVisible()) {
+            else if (isVisible) {
                 body[0].changeColor("lightGray");
                 makeVisible();
             }
             ok = true;
         }
-        else if (!wheels.containsKey(wheel) && body[0].getIsVisible()) {
-            JOptionPane.showMessageDialog(null, "This wheel don´t exist.");
+        else if (!wheels.containsKey(wheel) && isVisible) {
+            JOptionPane.showMessageDialog(null, "This wheel doesn't exist.");
         }
-        else if (body[0].getIsVisible()) {
-            JOptionPane.showMessageDialog(null, "This symbol don´t exist.");
+        else if (isVisible) {
+            JOptionPane.showMessageDialog(null, "This symbol doesn't exist.");
         }
     }
     
@@ -254,35 +263,21 @@ public class SlotMachine
      * @param wheel the position of the wheel to spin
      */
     public void spin(int wheel) {
-        String color;
-        int pos = -1;
         ok = false;
-        if (wheels.containsKey(wheel) && symbols.size() != 0) {
-            color = wheels.get(wheel).getSymbol();
-            for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
-                if (color == i.getValue().getSymbol()) {
-                    pos = i.getKey();
-                }
-            }
-            if (symbols.higherKey(pos) != null) {
-                color = symbols.get(symbols.higherKey(pos)).getSymbol();
-            }
-            else {
-                color = symbols.get(symbols.firstKey()).getSymbol();
-            }
-            wheels.get(wheel).changeSymbol(color);
+        if (wheels.containsKey(wheel) && symbols.size() != 0) {            
+            wheels.get(wheel).spin();
             ok = true;
-            if (isJackpot() && body[0].getIsVisible()) {
+            if (isJackpot() && isVisible) {
                 body[0].changeColor("yellow");
                 makeVisible();
             }
-            else if (body[0].getIsVisible()) {
+            else if (isVisible) {
                 body[0].changeColor("lightGray");
                 makeVisible();
             }
         }
-        else if (body[0].getIsVisible()) {
-            JOptionPane.showMessageDialog(null, "This wheel don´t exist or don't exists symbols.");
+        else if (isVisible) {
+            JOptionPane.showMessageDialog(null, "This wheel doesn't exist or don't exists symbols.");
         }
     }
     
@@ -300,8 +295,8 @@ public class SlotMachine
                 spin(key);
             }
         }
-        else if (body[0].getIsVisible()) {
-            JOptionPane.showMessageDialog(null, "In this moment don't exist any wheel to spin.");
+        else if (isVisible) {
+            JOptionPane.showMessageDialog(null, "In this moment doesn't exist any wheel to spin.");
         }
     }
     
@@ -385,6 +380,7 @@ public class SlotMachine
      * Makes the slot machine and its components visible.
      */
     public void makeVisible() {
+        isVisible = true;
         body[0].makeVisible();
         body[1].makeVisible();
         body[2].makeVisible();
@@ -400,6 +396,7 @@ public class SlotMachine
      * Makes the slot machine and its components invisible.
      */
     public void makeInvisible() {
+        isVisible = false;
         body[0].makeInvisible();
         body[1].makeInvisible();
         body[2].makeInvisible();
