@@ -34,6 +34,7 @@ public class Wheel
     
     private TreeMap <Integer, Symbol> symbols;
     
+    private boolean locked = false;
     /**
      * Constructs a new Wheel.
      * The wheel is made up of a list of 4 rectangles that give shape to
@@ -63,7 +64,7 @@ public class Wheel
             sym.changeColor(symbols.get(symbols.firstKey()).getSymbol());
         }
         else {
-            sym.changeColor("red");
+            sym.changeColor("white");
         }
         moveVertical((number-1)/ (SlotMachine.wheelsNumber/SlotMachine.linesOfWheels));
         moveHorizontal((number-1)% (SlotMachine.wheelsNumber/SlotMachine.linesOfWheels));
@@ -152,5 +153,23 @@ public class Wheel
      */
     public String getSymbol() {
         return sym.getColor();
+    }
+    
+    public void setLock(){
+        locked = true;
+    }
+    
+    public void setUnlock(){
+        locked = false;
+    }
+    
+    public boolean isLocked(){
+        return locked;
+    }
+    
+    public void swapWheel(Wheel wheel1, Wheel wheel2) {
+        String symTemp = wheel1.getSymbol();
+        wheel1.placeSymbol(wheel2.getSymbol());
+        wheel2.placeSymbol(symTemp);
     }
 }

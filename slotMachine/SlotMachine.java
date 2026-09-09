@@ -2,6 +2,7 @@ import javax.swing.JOptionPane;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Set;
 
 /**
  * The SlotMachine class represents a slot machine composed of a body,
@@ -23,7 +24,7 @@ import java.util.Arrays;
  * @version 22/08/26
  */
 public class SlotMachine
-{
+    {
     /**
      * The four rectangles that make up the shape/body of the slot machine.
      */
@@ -48,7 +49,7 @@ public class SlotMachine
     /**
      * Indicate if the app can do the last action.
      */
-    private boolean ok = true;
+    private boolean isOk = true;
     
     private boolean isVisible = false;
     
@@ -104,10 +105,10 @@ public class SlotMachine
      * @param pos the position where the new wheel will be placed
      */
     public void addWheel(int pos) {
-        ok = false;
+        isOk = false;
         if (! wheels.containsKey(pos) && pos <= wheelsNumber && pos >= 1) {
             wheels.put(pos, new Wheel(pos, symbols));
-            ok = true;
+            isOk = true;
             if (ok() && isVisible) {
                 makeVisible();
             }
@@ -124,14 +125,16 @@ public class SlotMachine
      * @param pos the position of the wheel to be removed
      */
     public void delWheel(int pos) {
-        ok = false;
-        if (wheels.containsKey(pos)) {
+        isOk = false;
+        if (wheels.containsKey(pos) && !wheels.get(pos).isLocked()) {
             wheels.get(pos).makeInvisible();
             wheels.remove(pos);
-            ok = true;
+            isOk = true;
         }
-        else if (isVisible){
+        else if (isVisible && !wheels.containsKey(pos)){
             JOptionPane.showMessageDialog(null, "This wheel don't exist.");
+        }else {
+            JOptionPane.showMessageDialog(null, "This wheel is locked.");
         }
     }
     
@@ -152,7 +155,7 @@ public class SlotMachine
                 break;
             }
         }
-        ok = false;
+        isOk = false;
         if (!symbols.containsKey(pos) && !existSymbol && pos > 0) {
             symbols.put(pos, new Symbol(color));
             if (symbols.size() == 1) {
@@ -160,7 +163,7 @@ public class SlotMachine
                     wheel.placeSymbol(color);
                 }
             }
-            ok = true;
+            isOk = true;
         }
         else if (symbols.containsKey(pos) && isVisible) {
             JOptionPane.showMessageDialog(null, "A symbol already exists in this position.");
@@ -185,7 +188,7 @@ public class SlotMachine
     public void delSymbol(String symbol) {
         boolean existSymbol = false;
         int pos = -1;
-        ok = false;
+        isOk = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
             if (symbol == i.getValue().getSymbol()) {
                 existSymbol = true;
@@ -207,7 +210,7 @@ public class SlotMachine
                 }
             }
             symbols.remove(pos);
-            ok = true;
+            isOk = true;
         }
         else if (isVisible) {
             JOptionPane.showMessageDialog(null, "This symbol doesn't exists in any position.");
@@ -227,14 +230,14 @@ public class SlotMachine
      */
     public void placeSymbol(int wheel, String symbol) {
         boolean existSymbol = false;
-        ok = false;
+        isOk = false;
         for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
             if (symbol == i.getValue().getSymbol()) {
                 existSymbol = true;
                 break;
             }
         }
-        if (existSymbol && wheels.containsKey(wheel)) {
+        if (existSymbol && wheels.containsKey(wheel) && !wheels.get(wheel).isLocked()) {
             wheels.get(wheel).placeSymbol(symbol);
             if (isJackpot() && isVisible) {
                 body[0].changeColor("yellow");
@@ -244,10 +247,13 @@ public class SlotMachine
                 body[0].changeColor("lightGray");
                 makeVisible();
             }
-            ok = true;
+            isOk = true;
         }
         else if (!wheels.containsKey(wheel) && isVisible) {
             JOptionPane.showMessageDialog(null, "This wheel doesn't exist.");
+        }
+        else if (wheels.get(wheel).isLocked() && isVisible) {
+            JOptionPane.showMessageDialog(null, "This wheel is locked.");
         }
         else if (isVisible) {
             JOptionPane.showMessageDialog(null, "This symbol doesn't exist.");
@@ -263,10 +269,10 @@ public class SlotMachine
      * @param wheel the position of the wheel to spin
      */
     public void spin(int wheel) {
-        ok = false;
-        if (wheels.containsKey(wheel) && symbols.size() != 0) {            
+        isOk = false;
+        if (wheels.containsKey(wheel) && symbols.size() != 0 && !wheels.get(wheel).isLocked()) {            
             wheels.get(wheel).spin();
-            ok = true;
+            isOk = true;
             if (isJackpot() && isVisible) {
                 body[0].changeColor("yellow");
                 makeVisible();
@@ -275,6 +281,9 @@ public class SlotMachine
                 body[0].changeColor("lightGray");
                 makeVisible();
             }
+        }
+        else if (wheels.get(wheel).isLocked() && isVisible){
+            JOptionPane.showMessageDialog(null, "This wheel is locked.");
         }
         else if (isVisible) {
             JOptionPane.showMessageDialog(null, "This wheel doesn't exist or don't exists symbols.");
@@ -289,10 +298,11 @@ public class SlotMachine
      */
 
     public void spin() {
-        ok = false;
+        isOk = false;
         if (wheels.size() != 0) {
             for (Integer key : wheels.keySet()) {
                 spin(key);
+                isOk = true;
             }
         }
         else if (isVisible) {
@@ -308,7 +318,7 @@ public class SlotMachine
      *         registered in the slot machine
      */
     public String[] symbols() {
-        ok = true;
+        isOk = true;
         String[] symbols = new String[this.symbols.size()];
         int j = 0;
         for (Map.Entry<Integer, Symbol> i : this.symbols.entrySet()) {
@@ -326,7 +336,7 @@ public class SlotMachine
      *         or 0 if there are no wheels
      */
     public int distinctSymbols() {
-        ok = true;
+        isOk = true;
         int distinct = 0;
         String[] symbols = new String[this.symbols.size()];
         for (Integer key : wheels.keySet()) {
@@ -348,8 +358,8 @@ public class SlotMachine
      */
     public boolean isJackpot() {
         boolean jackpot = false;
-        ok = true;
-        if (distinctSymbols() == 1) {
+        isOk = true;
+        if (distinctSymbols() == 1 && isVisible) {
             jackpot = true;
             JOptionPane.showMessageDialog(null, "You got a jackpot.");
         }
@@ -372,7 +382,7 @@ public class SlotMachine
             conf[j] = wheels.get(key).getSymbol();
             j += 1;
         }    
-        ok = true;
+        isOk = true;
         return conf;
     }
     
@@ -389,7 +399,7 @@ public class SlotMachine
         for (Integer key : wheels.keySet()) {
             wheels.get(key).makeVisible();
         }
-        ok = true;
+        isOk = true;
     }
     
     /**
@@ -405,7 +415,7 @@ public class SlotMachine
         for (Integer key : wheels.keySet()) {
             wheels.get(key).makeInvisible();
         }
-        ok = true;
+        isOk = true;
     }
     
     /**
@@ -414,7 +424,7 @@ public class SlotMachine
      */
     public void exit(){
         makeInvisible();
-        ok = true;
+        isOk = true;
         if (ok()) {
             JOptionPane.showMessageDialog(null, "You exit from the slot machine.");
         }
@@ -429,6 +439,113 @@ public class SlotMachine
      *         false otherwise
      */
     public boolean ok() {
-        return ok;
+        return isOk;
+    }
+    
+    //Nuevos metodos del ciclo 2
+    public void lock(int wheel) {
+        isOk = false;
+        Wheel wheelToLock = wheels.get(wheel);
+        if (wheelToLock == null) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "This wheel does not exist.");
+            }
+        } else if (wheelToLock.isLocked()) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "This wheel is already locked.");
+            }
+        } else {
+            wheelToLock.setLock();
+            isOk = true;
+        }
+    }
+    
+    public void unlock(int wheel){
+        isOk= false;
+        Wheel wheelToLock = wheels.get(wheel);
+        if (wheelToLock == null){
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "This wheel does not exist.");
+            }
+        } else if (!wheelToLock.isLocked()){
+            if (isVisible){
+                JOptionPane.showMessageDialog(null, "This wheel is already unlocked.");
+            }
+        } else {    
+            wheelToLock.setUnlock();
+            isOk = true;
+        }
+    }
+    public void swap(int wheel1, int wheel2) {
+        isOk = false;
+        Wheel newWheel1 = wheels.get(wheel1);
+        Wheel newWheel2 = wheels.get(wheel2);
+        if (newWheel1 == null && isVisible) {
+            JOptionPane.showMessageDialog(null, "The first wheel sent does not exist.");
+        } else if (newWheel2 == null && isVisible) {
+            JOptionPane.showMessageDialog(null, "The second wheel sent does not exist.");
+        } else if (wheel1 == wheel2 && isVisible) {
+            JOptionPane.showMessageDialog(null, "The wheels sent are the same.");
+        } else if (newWheel1.isLocked() && isVisible) {
+            JOptionPane.showMessageDialog(null, "The first wheel is locked.");
+        } else if (newWheel2.isLocked() && isVisible) {
+            JOptionPane.showMessageDialog(null, "The second wheel is locked.");
+        } else {
+            newWheel1.swapWheel(newWheel1, newWheel2);
+        }
+    }
+    
+    public void spin(int wheel, int steps) {
+        isOk = false;
+        Wheel selected = wheels.get(wheel);
+
+        if (selected == null) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "This wheel does not exist.");
+            }
+        } else if (selected.isLocked()) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "This wheel is locked.");
+            }
+        } else {        
+            for (int i = 0; i < steps; i++) {
+                spin(wheel);
+                if (isVisible) {
+                    try {
+                        Thread.sleep(400);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }
+            isOk = true;
+        }
+    }
+    
+    public void spin(String[] setSymbols) {
+        isOk = false;
+        boolean theresAWheelLocked = false;
+        for (Wheel wheel : wheels.values()) {
+            if (wheel.isLocked()) {
+                theresAWheelLocked = true;
+                break;
+            }
+        }
+        if (wheels.size() != setSymbols.length) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "The number of wheels differs from the number of symbols sent.");
+            }
+        } else if (theresAWheelLocked) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "There is at least one wheel locked.");
+            }
+        } else {
+            Integer[] llaves = wheels.keySet().toArray(new Integer[0]);
+            for (int i = 0; i < llaves.length; i++) {
+                placeSymbol(llaves[i], setSymbols[i]);
+            }
+            isOk = true;
+        }
     }
 }
