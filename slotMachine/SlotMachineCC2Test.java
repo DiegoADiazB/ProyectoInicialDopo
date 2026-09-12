@@ -61,14 +61,19 @@ public class SlotMachineCC2Test
         assertEquals("red", conf[1]);
     }
     
-    /**
-     * This test verifies that the same wheel shouldn't be able to swap with itself.
-     */
     @Test
-    public void shouldNotSwapTheSameWheel(){
-        machine.addSymbol(1, "red");
+    public void shouldNotSwapAWheelThatDoesNotExist(){
+        machine.swap(1,2);
+        assertFalse(machine.ok());
+    }
+    
+    @Test
+    public void shouldNotALockedWhell(){
+        machine.addSymbol(1,"red");
         machine.addWheel(1);
-        machine.swap(1,1);
+        machine.addWheel(2);
+        machine.lock(1);
+        machine.swap(1,2);
         assertFalse(machine.ok());
     }
     
@@ -88,6 +93,12 @@ public class SlotMachineCC2Test
         assertFalse(machine.ok());
     }
     
+    @Test
+    public void shouldNotLockAnNotCreatedWheel(){
+        machine.lock(1);
+        assertFalse(machine.ok());
+    }
+    
     //unlock
     @Test
     public void shouldUnlockAWheelLocked(){
@@ -98,8 +109,14 @@ public class SlotMachineCC2Test
     }
     
     @Test
-    public void shouldNotUnlockAWheelRecentlyCreated(){
+    public void shouldNotUnlockAnAlreadyUnlockedWheel(){
         machine.addWheel(1);
+        machine.unlock(1);
+        assertFalse(machine.ok());
+    }
+    
+    @Test
+    public void shouldNotUnlockAnNotCreatedWheel(){
         machine.unlock(1);
         assertFalse(machine.ok());
     }
@@ -111,6 +128,12 @@ public class SlotMachineCC2Test
         machine.addSymbol(1,"red");
         machine.spin(1,3);
         assertTrue(machine.ok());
+    }
+    
+    @Test
+    public void shouldNotSpinAnNotCreatedWheel(){
+        machine.spin(1,3);
+        assertFalse(machine.ok());
     }
     
     @Test
@@ -145,6 +168,19 @@ public class SlotMachineCC2Test
         machine.addSymbol(1,"red");
         machine.addSymbol(2,"yellow");
         machine.spin(new String[]{"yellow","red","red"});
+        assertFalse(machine.ok());
+    }
+    
+    @Test
+    public void shouldNotSpinWhenAtLeastOneWheelIsLocked(){
+        machine.addWheel(1);
+        machine.addWheel(2);
+        machine.addWheel(3);
+        machine.addSymbol(1,"red");
+        machine.addSymbol(2,"yellow");
+        machine.addSymbol(3,"blue");
+        machine.lock(1);
+        machine.spin(new String[]{"yellow","blue","red"});
         assertFalse(machine.ok());
     }
 }
