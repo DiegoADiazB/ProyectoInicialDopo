@@ -46,8 +46,8 @@ public class Wheel
         for (int i = 0; i < 4; i++) {
             body[i] = new Rectangle();
             body[i].changeColor("darkGray");
-            body[i].moveHorizontal(SlotMachine.interval);
-            body[i].moveVertical(SlotMachine.interval);
+            body[i].moveHorizontal(SlotMachine.INTERVAL);
+            body[i].moveVertical(SlotMachine.INTERVAL);
         }
         body[0].changeSize(height, width);
         body[1].changeSize(height-10, width-10);
@@ -59,15 +59,15 @@ public class Wheel
         body[3].moveVertical(height - height/5);
         sym.changeSize(width/2);
         sym.moveVertical(height/7 + 3*height/8);
-        sym.moveHorizontal(width/4 + SlotMachine.interval);
+        sym.moveHorizontal(width/4 + SlotMachine.INTERVAL);
         if (symbols.size() != 0) {
             sym.changeColor(symbols.get(symbols.firstKey()).getSymbol());
         }
         else {
             sym.changeColor("white");
         }
-        moveVertical((number-1)/ (SlotMachine.wheelsNumber/SlotMachine.linesOfWheels));
-        moveHorizontal((number-1)% (SlotMachine.wheelsNumber/SlotMachine.linesOfWheels));
+        moveVertical((number-1)/ (SlotMachine.WHEELS_NUMBER/SlotMachine.LINES_OF_WHEELS));
+        moveHorizontal((number-1)% (SlotMachine.WHEELS_NUMBER/SlotMachine.LINES_OF_WHEELS));
     }
     
     public void spin() {
@@ -94,9 +94,9 @@ public class Wheel
      */
     private void moveVertical(int y) {
         for (int i = 0; i < 4; i++) {
-            body[i].moveVertical(y*(height + SlotMachine.interval/2));
+            body[i].moveVertical(y*(height + SlotMachine.INTERVAL/2));
         }
-        sym.moveVertical(y*(height + SlotMachine.interval/2));
+        sym.moveVertical(y*(height + SlotMachine.INTERVAL/2));
     }
     
     /**
@@ -108,9 +108,9 @@ public class Wheel
      */
     private void moveHorizontal(int x) {
         for (int i = 0; i < 4; i++) {
-            body[i].moveHorizontal(x*(width+ SlotMachine.interval));
+            body[i].moveHorizontal(x*(width+ SlotMachine.INTERVAL));
         }
-        sym.moveHorizontal(x*(width+ SlotMachine.interval));
+        sym.moveHorizontal(x*(width+ SlotMachine.INTERVAL));
     }
     
     /**
@@ -155,21 +155,35 @@ public class Wheel
         return sym.getColor();
     }
     
+    /**
+     * Sets this wheel locked.
+     */
     public void setLock(){
         locked = true;
     }
-    
+    /**
+     * Sets this wheel unlocked.
+     */
     public void setUnlock(){
         locked = false;
     }
     
+    /**
+     * Returns if the wheel is locked or not.
+     * @return true if the wheel is locked, false otherwise.
+     */
     public boolean isLocked(){
         return locked;
     }
     
-    public void swapWheel(Wheel wheel1, Wheel wheel2) {
-        String symTemp = wheel1.getSymbol();
-        wheel1.placeSymbol(wheel2.getSymbol());
+    /**
+     * Makes the process to change the symbols of 2 wheels.
+     * 
+     * @param the wheels to be swapped.
+     */
+    public void swapWheel(Wheel wheel2) {
+        String symTemp = this.getSymbol();
+        this.placeSymbol(wheel2.getSymbol());
         wheel2.placeSymbol(symTemp);
     }
 }

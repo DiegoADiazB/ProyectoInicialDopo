@@ -182,14 +182,4 @@ public class CC2AcceptenceTest
     {
         JOptionPane.showMessageDialog(null, text);
     }
-
-    /**
-     * Entry point to run the complete acceptance test.
-     *
-     * @param args not used
-     */
-    public static void main(String[] args)
-    {
-        new CC2AcceptenceTest().runAll();
-    }
 }

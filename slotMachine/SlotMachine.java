@@ -7,13 +7,13 @@ import java.util.Set;
 /**
  * The SlotMachine class represents a slot machine composed of a body,
  * a lever handle, a set of wheels, and a set of symbols.
- * <p>
+ * 
  * The machine's shape is built from four rectangles and a circle
  * representing the lever handle. Wheels and symbols are stored in
  * separate TreeMaps, indexed by their position, which allows the
  * machine to manage, add, remove, and update them individually or
  * as a whole.
- * <p>
+ * 
  * The class also provides functionality to spin individual wheels or
  * all wheels at once, place specific symbols on a wheel, and check
  * whether a jackpot condition has been reached (i.e. when all wheels
@@ -53,15 +53,15 @@ public class SlotMachine
     
     private boolean isVisible = false;
     
-    public static final int wheelsNumber = 50;
+    public static final int WHEELS_NUMBER = 50;
     
-    public static final int linesOfWheels = 5;
+    public static final int LINES_OF_WHEELS = 5;
     
-    public static final int interval = 20;
+    public static final int INTERVAL = 20;
     
-    private static final int height = Wheel.height*linesOfWheels + interval*(linesOfWheels+1);
+    private static final int HEIGHT = Wheel.height*LINES_OF_WHEELS + INTERVAL*(LINES_OF_WHEELS+1);
     
-    private static final int width =  Wheel.width*(wheelsNumber/linesOfWheels) + interval*((wheelsNumber/linesOfWheels)+1);
+    private static final int WIDTH =  Wheel.width*(WHEELS_NUMBER/LINES_OF_WHEELS) + INTERVAL*((WHEELS_NUMBER/LINES_OF_WHEELS)+1);
     
     /**
      * Constructs a new SlotMachine.
@@ -73,23 +73,23 @@ public class SlotMachine
         for (int i = 0; i < 4; i++) {
             body[i] = new Rectangle();
         }
-        body[0].changeSize(height,width);
+        body[0].changeSize(HEIGHT,WIDTH);
         body[0].changeColor("lightGray");
-        body[1].changeSize(height/20,width-2*interval);
-        body[1].moveVertical(height);
-        body[1].moveHorizontal(interval);
+        body[1].changeSize(HEIGHT/20,WIDTH-2*INTERVAL);
+        body[1].moveVertical(HEIGHT);
+        body[1].moveHorizontal(INTERVAL);
         body[1].changeColor("darkGray");
-        body[2].changeSize(interval*2,width/10);
-        body[2].moveVertical(height/2);
-        body[2].moveHorizontal(width);
+        body[2].changeSize(INTERVAL*2,WIDTH/10);
+        body[2].moveVertical(HEIGHT/2);
+        body[2].moveHorizontal(WIDTH);
         body[2].changeColor("darkGray");
-        body[3].changeSize(width/10,interval*2);
-        body[3].moveVertical(height/2 - width/10);
-        body[3].moveHorizontal(width - (2*interval) + width/10);
+        body[3].changeSize(WIDTH/10,INTERVAL*2);
+        body[3].moveVertical(HEIGHT/2 - WIDTH/10);
+        body[3].moveHorizontal(WIDTH - (2*INTERVAL) + WIDTH/10);
         body[3].changeColor("darkGray");
-        handle.changeSize(width/10);
-        handle.moveVertical(height/2 - width/5 + 2*interval);
-        handle.moveHorizontal(width + (width/10-interval*3));
+        handle.changeSize(WIDTH/10);
+        handle.moveVertical(HEIGHT/2 - WIDTH/5 + 2*INTERVAL);
+        handle.moveHorizontal(WIDTH + (WIDTH/10-INTERVAL*3));
         handle.changeColor("red");
         wheels = new TreeMap<>();
         symbols = new TreeMap<>();
@@ -106,7 +106,7 @@ public class SlotMachine
      */
     public void addWheel(int pos) {
         isOk = false;
-        if (! wheels.containsKey(pos) && pos <= wheelsNumber && pos >= 1) {
+        if (! wheels.containsKey(pos) && pos <= WHEELS_NUMBER && pos >= 1) {
             wheels.put(pos, new Wheel(pos, symbols));
             isOk = true;
             if (ok() && isVisible) {
@@ -443,39 +443,53 @@ public class SlotMachine
     }
     
     //Nuevos metodos del ciclo 2
+    /**
+     * Locks a wheel so that it cannot be interacted with until it is unlocked.
+     * 
+     * @param the wheel to be locked.
+     */
     public void lock(int wheel) {
         isOk = false;
-        Wheel wheelToLock = wheels.get(wheel);
-        if (wheelToLock == null) {
+        if (!wheels.containsKey(wheel)) {
             if (isVisible) {
                 JOptionPane.showMessageDialog(null, "This wheel does not exist.");
             }
-        } else if (wheelToLock.isLocked()) {
+        } else if (wheels.get(wheel).isLocked()) {
             if (isVisible) {
                 JOptionPane.showMessageDialog(null, "This wheel is already locked.");
             }
         } else {
-            wheelToLock.setLock();
+            wheels.get(wheel).setLock();
             isOk = true;
         }
     }
     
+    /**
+     * Unlocks an already locked wheel.
+     * 
+     * @param the wheel to be unlocked.
+     */
     public void unlock(int wheel){
         isOk= false;
-        Wheel wheelToLock = wheels.get(wheel);
-        if (wheelToLock == null){
+        if (!wheels.containsKey(wheel)){
             if (isVisible) {
                 JOptionPane.showMessageDialog(null, "This wheel does not exist.");
             }
-        } else if (!wheelToLock.isLocked()){
+        } else if (!wheels.get(wheel).isLocked()){
             if (isVisible){
                 JOptionPane.showMessageDialog(null, "This wheel is already unlocked.");
             }
         } else {    
-            wheelToLock.setUnlock();
+            wheels.get(wheel).setUnlock();
             isOk = true;
         }
     }
+    
+    /**
+     * Change the symbols on 2 wheels.
+     * 
+     * @param the wheels to be swapped.
+     */
     public void swap(int wheel1, int wheel2) {
         isOk = false;
         Wheel newWheel1 = wheels.get(wheel1);
@@ -497,20 +511,22 @@ public class SlotMachine
                 JOptionPane.showMessageDialog(null, "The second wheel is locked.");
             }
         } else {
-            newWheel1.swapWheel(newWheel1, newWheel2);
+            newWheel1.swapWheel(newWheel2);
             isOk = true;
        }
     }
     
+    /**
+     * Allows the wheel to spin a determined number of times.
+     * @param the wheel that is going to spin and the number of spins.
+     */
     public void spin(int wheel, int steps) {
         isOk = false;
-        Wheel selected = wheels.get(wheel);
-
-        if (selected == null) {
+        if (!wheels.containsKey(wheel)) {
             if (isVisible) {
                 JOptionPane.showMessageDialog(null, "This wheel does not exist.");
             }
-        } else if (selected.isLocked()) {
+        } else if (wheels.get(wheel).isLocked()) {
             if (isVisible) {
                 JOptionPane.showMessageDialog(null, "This wheel is locked.");
             }
@@ -530,12 +546,17 @@ public class SlotMachine
         }
     }
     
+    /**
+     * Leave the slotMachine in a given configuration.
+     * 
+     * @param the set that contains the symbols to each wheel.
+     */
     public void spin(String[] setSymbols) {
         isOk = false;
         boolean theresAWheelLocked = false;
         for (Wheel wheel : wheels.values()) {
-            if (wheel.isLocked()) {
-                theresAWheelLocked = true;
+            theresAWheelLocked = wheel.isLocked();
+            if (theresAWheelLocked) {
                 break;
             }
         }
