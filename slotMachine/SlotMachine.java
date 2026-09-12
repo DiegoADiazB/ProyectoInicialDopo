@@ -149,8 +149,10 @@ public class SlotMachine
      */
     public void addSymbol(int pos, String color) {
         boolean existSymbol = false;
-        for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
-            if (color == i.getValue().getSymbol()) {
+        String symbol;
+        for (Symbol s : symbols.values()) {
+            symbol = s.getSymbol();
+            if (color.equals(symbol)) {
                 existSymbol = true;
                 break;
             }
@@ -186,17 +188,17 @@ public class SlotMachine
      * @param symbol the color of the symbol to be removed
      */
     public void delSymbol(String symbol) {
-        boolean existSymbol = false;
-        int pos = -1;
+        Symbol sym = null;
+        String color;
         isOk = false;
-        for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
-            if (symbol == i.getValue().getSymbol()) {
-                existSymbol = true;
-                pos = i.getKey();
+        for (Symbol s : symbols.values()) {
+            color = s.getSymbol();
+            if (symbol.equals(color)) {
+                sym = s;
                 break;
             }
         }
-        if (existSymbol) {
+        if (sym != null) {
             if (symbols.size() == 1) {
                 for (Wheel wheel : wheels.values()) {
                     wheel.placeSymbol("white");
@@ -204,13 +206,14 @@ public class SlotMachine
             }
             else {
                 for (Integer key : wheels.keySet()) {
-                    if (symbol == wheels.get(key).getSymbol()) {
+                    color = wheels.get(key).getSymbol();
+                    if (symbol.equals(color) ) {
                         spin(key);
                     }
                 }
             }
-            symbols.remove(pos);
-            isOk = true;
+            symbols.values().remove(sym);
+            isOk = true;    
         }
         else if (isVisible) {
             JOptionPane.showMessageDialog(null, "This symbol doesn't exists in any position.");
@@ -230,9 +233,11 @@ public class SlotMachine
      */
     public void placeSymbol(int wheel, String symbol) {
         boolean existSymbol = false;
+        String color;
         isOk = false;
-        for (Map.Entry<Integer, Symbol> i : symbols.entrySet()) {
-            if (symbol == i.getValue().getSymbol()) {
+        for (Symbol s : symbols.values()) {
+            color = s.getSymbol();
+            if (symbol.equals(color)) {
                 existSymbol = true;
                 break;
             }
@@ -321,8 +326,8 @@ public class SlotMachine
         isOk = true;
         String[] symbols = new String[this.symbols.size()];
         int j = 0;
-        for (Map.Entry<Integer, Symbol> i : this.symbols.entrySet()) {
-            symbols[j] = i.getValue().getSymbol();
+        for (Symbol symbol : this.symbols.values()) {
+            symbols[j] = symbol.getSymbol();
             j += 1;
         }
         return symbols;
@@ -338,10 +343,12 @@ public class SlotMachine
     public int distinctSymbols() {
         isOk = true;
         int distinct = 0;
+        String color;
         String[] symbols = new String[this.symbols.size()];
-        for (Integer key : wheels.keySet()) {
-            if (!Arrays.asList(symbols).contains(wheels.get(key).getSymbol())) {
-                symbols[distinct] = wheels.get(key).getSymbol();
+        for (Wheel wheel : wheels.values()) {
+            color = wheel.getSymbol();
+            if (!Arrays.asList(symbols).contains(color)) {
+                symbols[distinct] = color;
                 distinct += 1;
             }
         }
@@ -378,10 +385,11 @@ public class SlotMachine
     public String[] configuration() {
         String[] conf = new String[wheels.size()];
         int j = 0;
-        for (Integer key : wheels.keySet()) {
-            conf[j] = wheels.get(key).getSymbol();
+        for (Wheel wheel : wheels.values()) {
+            conf[j] = wheel.getSymbol();
             j += 1;
         }    
+        
         isOk = true;
         return conf;
     }
@@ -396,8 +404,8 @@ public class SlotMachine
         body[2].makeVisible();
         body[3].makeVisible();
         handle.makeVisible();
-        for (Integer key : wheels.keySet()) {
-            wheels.get(key).makeVisible();
+        for (Wheel wheel : wheels.values()) {
+            wheel.makeVisible();
         }
         isOk = true;
     }
@@ -412,8 +420,8 @@ public class SlotMachine
         body[2].makeInvisible();
         body[3].makeInvisible();
         handle.makeInvisible();
-        for (Integer key : wheels.keySet()) {
-            wheels.get(key).makeInvisible();
+        for (Wheel wheel : wheels.values()) {
+            wheel.makeInvisible();
         }
         isOk = true;
     }
@@ -491,7 +499,7 @@ public class SlotMachine
         } else if (newWheel2.isLocked() && isVisible) {
             JOptionPane.showMessageDialog(null, "The second wheel is locked.");
         } else {
-            newWheel1.swapWheel(newWheel1, newWheel2);
+            newWheel1.swapWheel(newWheel2);
         }
     }
     

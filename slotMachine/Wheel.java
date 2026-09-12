@@ -167,9 +167,9 @@ public class Wheel
         return locked;
     }
     
-    public void swapWheel(Wheel wheel1, Wheel wheel2) {
-        String symTemp = wheel1.getSymbol();
-        wheel1.placeSymbol(wheel2.getSymbol());
-        wheel2.placeSymbol(symTemp);
+    public void swapWheel(Wheel wheel) {
+        String symTemp = this.getSymbol();
+        this.placeSymbol(wheel.getSymbol());
+        wheel.placeSymbol(symTemp);
     }
 }
