@@ -480,19 +480,26 @@ public class SlotMachine
         isOk = false;
         Wheel newWheel1 = wheels.get(wheel1);
         Wheel newWheel2 = wheels.get(wheel2);
-        if (newWheel1 == null && isVisible) {
-            JOptionPane.showMessageDialog(null, "The first wheel sent does not exist.");
-        } else if (newWheel2 == null && isVisible) {
-            JOptionPane.showMessageDialog(null, "The second wheel sent does not exist.");
-        } else if (wheel1 == wheel2 && isVisible) {
-            JOptionPane.showMessageDialog(null, "The wheels sent are the same.");
-        } else if (newWheel1.isLocked() && isVisible) {
-            JOptionPane.showMessageDialog(null, "The first wheel is locked.");
-        } else if (newWheel2.isLocked() && isVisible) {
-            JOptionPane.showMessageDialog(null, "The second wheel is locked.");
+        if (newWheel1 == null) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "The first wheel sent does not exist.");
+            }
+        } else if (newWheel2 == null) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "The second wheel sent does not exist.");
+            }
+        } else if (newWheel1.isLocked()) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "The first wheel is locked.");
+            }
+        } else if (newWheel2.isLocked()) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "The second wheel is locked.");
+            }
         } else {
             newWheel1.swapWheel(newWheel1, newWheel2);
-        }
+            isOk = true;
+       }
     }
     
     public void spin(int wheel, int steps) {
