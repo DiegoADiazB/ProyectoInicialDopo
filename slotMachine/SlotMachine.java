@@ -518,7 +518,12 @@ public class SlotMachine
     
     /**
      * Allows the wheel to spin a determined number of times.
-     * @param the wheel that is going to spin and the number of spins.
+     * The wheel is guaranteed not to end on the symbol it had before
+     * spinning: if after the requested steps it landed back on its
+     * initial symbol, it keeps spinning until it shows a different one.
+     *
+     * @param wheel the position of the wheel that is going to spin
+     * @param steps the number of spins to perform
      */
     public void spin(int wheel, int steps) {
         isOk = false;
@@ -530,8 +535,18 @@ public class SlotMachine
             if (isVisible) {
                 JOptionPane.showMessageDialog(null, "This wheel is locked.");
             }
-        } else {        
-            for (int i = 0; i < steps; i++) {
+        } else if (steps < 1) {
+            if (isVisible) {
+                JOptionPane.showMessageDialog(null, "The number of spins must be at least 1.");
+            }
+        } else if (symbols.size() < 2) {
+            if (isVisible) {
+            JOptionPane.showMessageDialog(null, "There are not enough symbols to change the wheel.");
+            }
+        } else {
+            String initialSymbol = wheels.get(wheel).getSymbol();
+            int i = 0;
+            while (i < steps || wheels.get(wheel).getSymbol().equals(initialSymbol)) {
                 spin(wheel);
                 if (isVisible) {
                     try {
@@ -541,6 +556,7 @@ public class SlotMachine
                         return;
                     }
                 }
+                i++;
             }
             isOk = true;
         }

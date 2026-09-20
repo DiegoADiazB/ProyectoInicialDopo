@@ -126,6 +126,9 @@ public class SlotMachineCC2Test
     public void shouldSpinAnUnlockedWheel(){
         machine.addWheel(1);
         machine.addSymbol(1,"red");
+        machine.addSymbol(2,"yellow");
+        machine.addSymbol(3,"pink");
+        machine.addSymbol(4,"blue");
         machine.spin(1,3);
         assertTrue(machine.ok());
     }
@@ -143,6 +146,30 @@ public class SlotMachineCC2Test
         machine.lock(1);
         machine.spin(1,3);
         assertFalse(machine.ok());
+    }
+    
+    @Test
+    public void shouldNotSpinAWheelZeroTimes() {
+        machine.addSymbol(1, "red");
+        machine.addSymbol(2, "yellow");
+        machine.addSymbol(3, "green");
+        machine.addWheel(1);
+ 
+        machine.spin(1, 0);
+ 
+        assertFalse(machine.ok());
+        assertEquals("red", machine.configuration()[0]);
+    }
+    
+    @Test
+    public void shouldNotSpinAWheelWithLessThanTwoSymbols() {
+        machine.addSymbol(1, "red");
+        machine.addWheel(1);
+ 
+        machine.spin(1, 3);
+ 
+        assertFalse(machine.ok());
+        assertEquals("red", machine.configuration()[0]);
     }
     
     //spin configuration
