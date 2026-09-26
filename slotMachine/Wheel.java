@@ -8,9 +8,8 @@ import java.util.TreeMap;
  * to it. When a wheel is first created, it has no symbol assigned and
  * is displayed in white.
  * <p>
- * The class provides functionality to position the wheel both
- * vertically and horizontally within the machine, show or hide the
- * wheel, and change or retrieve the symbol it currently displays.
+ * The wheel knows whether it is locked, so it is the one that decides
+ * whether it can be spun, changed, swapped or removed.
  *
  * @author Juan Diego Cardozo Beltrán
  * @author Diego Alejandro Díaz Boada
@@ -35,42 +34,62 @@ public class Wheel
     private TreeMap <Integer, Symbol> symbols;
     
     private boolean locked = false;
+    
     /**
-     * Constructs a new Wheel.
-     * The wheel is made up of a list of 4 rectangles that give shape to
-     * the slot, and a circle in the middle representing the symbol. Since
-     * the wheel has no symbol assigned at the start, it is left in white.
+     * Width in pixels of the white inner border of the wheel.
+     */
+    private static final int BORDER = 5;
+    
+    /**
+     * Constructs a new Wheel at the given position of the machine.
+     * Sizes are computed in pixels from height and width, and the position
+     * from SlotMachine.COLUMNS and SlotMachine.INTERVAL. Since the wheel
+     * has no symbol assigned at the start, it is left in white.
+     *
+     * @param number  the position of the wheel (starting at 1)
+     * @param symbols the symbols available in the machine
      */
     public Wheel(int number, TreeMap<Integer, Symbol> symbols){
         this.symbols = symbols;
+        int bar = height / 5;
+        int diameter = Math.min(width, height - 2 * bar) * 3 / 4;
         for (int i = 0; i < 4; i++) {
             body[i] = new Rectangle();
             body[i].changeColor("darkGray");
-            body[i].moveHorizontal(SlotMachine.INTERVAL);
-            body[i].moveVertical(SlotMachine.INTERVAL);
         }
         body[0].changeSize(height, width);
-        body[1].changeSize(height-10, width-10);
-        body[1].moveVertical(5);
-        body[1].moveHorizontal(5);
+        body[1].changeSize(height - 2 * BORDER, width - 2 * BORDER);
+        body[1].moveHorizontal(BORDER);
+        body[1].moveVertical(BORDER);
         body[1].changeColor("white");
-        body[2].changeSize(height/5, width);
-        body[3].changeSize(height/5, width);
-        body[3].moveVertical(height - height/5);
-        sym.changeSize(width/2);
-        sym.moveVertical(height/7 + 3*height/8);
-        sym.moveHorizontal(width/4 + SlotMachine.INTERVAL);
+        body[2].changeSize(bar, width);
+        body[3].changeSize(bar, width);
+        body[3].moveVertical(height - bar);
+        sym.changeSize(diameter);
+        sym.moveHorizontal((width - diameter) / 2);
+        sym.moveVertical((height - diameter) / 2);
         if (symbols.size() != 0) {
             sym.changeColor(symbols.get(symbols.firstKey()).getSymbol());
         }
         else {
             sym.changeColor("white");
         }
-        moveVertical((number-1)/ (SlotMachine.WHEELS_NUMBER/SlotMachine.LINES_OF_WHEELS));
-        moveHorizontal((number-1)% (SlotMachine.WHEELS_NUMBER/SlotMachine.LINES_OF_WHEELS));
+        int column = (number - 1) % SlotMachine.COLUMNS;
+        int line = (number - 1) / SlotMachine.COLUMNS;
+        moveTo(SlotMachine.INTERVAL + column * (width + SlotMachine.INTERVAL),
+               SlotMachine.INTERVAL + line * (height + SlotMachine.INTERVAL));
     }
     
-    public void spin() {
+    /**
+     * Moves the wheel to the next symbol of the machine, only if the
+     * wheel is not locked.
+     *
+     * @return true if the wheel spun, false if it is locked
+     */
+    public boolean spin() {
+        if (locked) {
+            return false;
+        }
         int symbolKey = -1;
         for (Integer key : symbols.keySet()) {
             if (symbols.get(key).getSymbol() == sym.getColor()) {
@@ -78,39 +97,27 @@ public class Wheel
             }
         }
         if (symbols.higherKey(symbolKey) != null) {
-            placeSymbol(symbols.get(symbols.higherKey(symbolKey)).getSymbol());
+            setSymbol(symbols.get(symbols.higherKey(symbolKey)).getSymbol());
         }
         else {
-            placeSymbol(symbols.get(symbols.firstKey()).getSymbol());
+            setSymbol(symbols.get(symbols.firstKey()).getSymbol());
         }
+        return true;
     }
     
     /**
-     * Positions the wheel's shapes according to their vertical position
-     * on the machine, moving them enough to leave a 10 pixel vertical
-     * gap between wheels.
+     * Moves every shape of the wheel by the given offset in pixels.
      *
-     * @param y the vertical position to move the wheel to
+     * @param x the horizontal offset in pixels
+     * @param y the vertical offset in pixels
      */
-    private void moveVertical(int y) {
+    private void moveTo(int x, int y) {
         for (int i = 0; i < 4; i++) {
-            body[i].moveVertical(y*(height + SlotMachine.INTERVAL/2));
+            body[i].moveHorizontal(x);
+            body[i].moveVertical(y);
         }
-        sym.moveVertical(y*(height + SlotMachine.INTERVAL/2));
-    }
-    
-    /**
-     * Positions the wheel's shapes according to their horizontal position
-     * on the machine, moving them enough to leave a 10 pixel horizontal
-     * gap between wheels.
-     *
-     * @param x the horizontal position to move the wheel to
-     */
-    private void moveHorizontal(int x) {
-        for (int i = 0; i < 4; i++) {
-            body[i].moveHorizontal(x*(width+ SlotMachine.INTERVAL));
-        }
-        sym.moveHorizontal(x*(width+ SlotMachine.INTERVAL));
+        sym.moveHorizontal(x);
+        sym.moveVertical(y);
     }
     
     /**
@@ -136,13 +143,26 @@ public class Wheel
     }
     
     /**
-     * Changes the symbol currently displayed on the wheel.
-     * Changes the color of the circle to the color received as a
-     * parameter.
+     * Places a symbol on the wheel, only if the wheel is not locked.
+     *
+     * @param color the color of the symbol to place
+     * @return true if the symbol was placed, false if the wheel is locked
+     */
+    public boolean placeSymbol(String color) {
+        if (locked) {
+            return false;
+        }
+        setSymbol(color);
+        return true;
+    }
+    
+    /**
+     * Changes the symbol shown by the wheel regardless of its lock.
+     * Used by the machine when its own set of symbols changes.
      *
      * @param color the new color to assign to the wheel's symbol
      */
-    public void placeSymbol(String color) {
+    public void setSymbol(String color) {
         sym.changeColor(color);
     }
     
@@ -156,34 +176,58 @@ public class Wheel
     }
     
     /**
-     * Sets this wheel locked.
+     * Locks the wheel.
+     *
+     * @return true if the wheel was locked, false if it was already locked
      */
-    public void setLock(){
+    public boolean lock() {
+        if (locked) {
+            return false;
+        }
         locked = true;
+        return true;
     }
+    
     /**
-     * Sets this wheel unlocked.
+     * Unlocks the wheel.
+     *
+     * @return true if the wheel was unlocked, false if it was not locked
      */
-    public void setUnlock(){
+    public boolean unlock() {
+        if (!locked) {
+            return false;
+        }
         locked = false;
+        return true;
     }
     
     /**
-     * Returns if the wheel is locked or not.
-     * @return true if the wheel is locked, false otherwise.
-     */
-    public boolean isLocked(){
-        return locked;
-    }
-    
-    /**
-     * Makes the process to change the symbols of 2 wheels.
+     * Exchanges the symbol of this wheel with the symbol of another one,
+     * only if neither of them is locked.
      * 
-     * @param the wheels to be swapped.
+     * @param wheel2 the wheel to swap symbols with
+     * @return true if the symbols were swapped, false if a wheel is locked
      */
-    public void swapWheel(Wheel wheel2) {
+    public boolean swapWheel(Wheel wheel2) {
+        if (locked || wheel2.locked) {
+            return false;
+        }
         String symTemp = this.getSymbol();
-        this.placeSymbol(wheel2.getSymbol());
-        wheel2.placeSymbol(symTemp);
+        this.setSymbol(wheel2.getSymbol());
+        wheel2.setSymbol(symTemp);
+        return true;
+    }
+    
+    /**
+     * Hides the wheel so it can be removed, only if it is not locked.
+     *
+     * @return true if the wheel can be removed, false if it is locked
+     */
+    public boolean remove() {
+        if (locked) {
+            return false;
+        }
+        makeInvisible();
+        return true;
     }
 }
