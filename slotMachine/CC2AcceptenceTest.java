@@ -52,7 +52,6 @@ public class CC2AcceptenceTest
     {
         runValidOperations();
         runSpecialCases();
-        narrate("Fin de la prueba de aceptación del ciclo 2.");
     }
 
     /**
