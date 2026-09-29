@@ -167,35 +167,8 @@ public class SlotMachineCC2Test
 
         machine.unlock(1);
         assertTrue(machine.ok());
-<<<<<<< HEAD
-    }
-    
-    @Test
-    public void shouldNotUnlockAnAlreadyUnlockedWheel(){
-        machine.addWheel(1);
-        machine.unlock(1);
-        assertFalse(machine.ok());
-    }
-    
-    @Test
-    public void shouldNotUnlockAnNotCreatedWheel(){
-        machine.unlock(1);
-        assertFalse(machine.ok());
-    }
-    
-    //spin steps
-    @Test
-    public void shouldSpinAnUnlockedWheel(){
-        machine.addWheel(1);
-        machine.addSymbol(1,"red");
-        machine.addSymbol(2,"yellow");
-        machine.addSymbol(3,"pink");
-        machine.addSymbol(4,"blue");
-        machine.spin(1,3);
-=======
 
         machine.placeSymbol(1, "yellow");
->>>>>>> 4f76094920d50006c6be111a20e7f33bb3fbbfce
         assertTrue(machine.ok());
         assertEquals("yellow", machine.configuration()[0]);
     }
@@ -217,40 +190,11 @@ public class SlotMachineCC2Test
         assertTrue(machine.ok());
         assertEquals("yellow", machine.configuration()[0]);
     }
-<<<<<<< HEAD
-    
-    @Test
-    public void shouldNotSpinAWheelZeroTimes() {
-        machine.addSymbol(1, "red");
-        machine.addSymbol(2, "yellow");
-        machine.addSymbol(3, "green");
-        machine.addWheel(1);
- 
-        machine.spin(1, 0);
- 
-        assertFalse(machine.ok());
-        assertEquals("red", machine.configuration()[0]);
-    }
-    
-    @Test
-    public void shouldNotSpinAWheelWithLessThanTwoSymbols() {
-        machine.addSymbol(1, "red");
-        machine.addWheel(1);
- 
-        machine.spin(1, 3);
- 
-        assertFalse(machine.ok());
-        assertEquals("red", machine.configuration()[0]);
-    }
-    
-    //spin configuration
-=======
 
     /**
      * Unlocking a wheel that does not exist should fail and should not
      * create any wheel.
      */
->>>>>>> 4f76094920d50006c6be111a20e7f33bb3fbbfce
     @Test
     public void shouldNotUnlockANotCreatedWheel() {
         machine.unlock(1);
