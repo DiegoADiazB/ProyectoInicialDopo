@@ -120,7 +120,7 @@ public class SlotMachine
      *
      * @param n the number of wheels and symbols of the machine
      */
-    SlotMachine(int n) {
+    public SlotMachine(int n) {
         this();
         int max = WHEELS_NUMBER;
         if (COLORS.length < max) {
