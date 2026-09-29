@@ -7,6 +7,8 @@ import java.util.*;
  * Canvas is a class to allow for simple graphical drawing on a canvas.
  * This is a modification of the general purpose Canvas, specially made for
  * the BlueJ "shapes" example. 
+ * Extended to support CSS color names (case insensitive) and hexadecimal
+ * colors.
  *
  * @author: Bruce Quig
  * @author: Michael Kolling (mik)
@@ -20,6 +22,39 @@ public class Canvas{
     // shape objects in this project clean and simple for educational purposes.
 
     private static Canvas canvasSingleton;
+
+    /**
+     * CSS color names (in lowercase) and their colors.
+     */
+    private static final HashMap<String, Color> COLORS = new HashMap<String, Color>();
+
+    static {
+        String[] names = {
+            "red", "blue", "green", "yellow", "orange", "purple", "pink", "brown",
+            "black", "cyan", "magenta", "lime", "navy", "teal", "olive", "maroon",
+            "slategray", "gold", "coral", "salmon", "orchid", "violet", "indigo",
+            "turquoise", "khaki", "crimson", "tomato", "chocolate", "tan", "plum",
+            "beige", "lavender", "springgreen", "mediumpurple", "skyblue",
+            "seagreen", "slateblue", "steelblue", "darkred", "darkgreen",
+            "darkblue", "darkorange", "hotpink", "deeppink", "royalblue",
+            "forestgreen", "sienna", "peru", "orangered", "yellowgreen",
+            "white", "gray", "lightgray", "darkgray"
+        };
+        int[] rgb = {
+            0xFF0000, 0x0000FF, 0x008000, 0xFFFF00, 0xFFA500, 0x800080, 0xFFC0CB, 0xA52A2A,
+            0x000000, 0x00FFFF, 0xFF00FF, 0x00FF00, 0x000080, 0x008080, 0x808000, 0x800000,
+            0x708090, 0xFFD700, 0xFF7F50, 0xFA8072, 0xDA70D6, 0xEE82EE, 0x4B0082,
+            0x40E0D0, 0xF0E68C, 0xDC143C, 0xFF6347, 0xD2691E, 0xD2B48C, 0xDDA0DD,
+            0xF5F5DC, 0xE6E6FA, 0x00FF7F, 0x9370DB, 0x87CEEB,
+            0x2E8B57, 0x6A5ACD, 0x4682B4, 0x8B0000, 0x006400,
+            0x00008B, 0xFF8C00, 0xFF69B4, 0xFF1493, 0x4169E1,
+            0x228B22, 0xA0522D, 0xCD853F, 0xFF4500, 0x9ACD32,
+            0xFFFFFF, 0x808080, 0xC0C0C0, 0x404040
+        };
+        for (int i = 0; i < names.length; i++) {
+            COLORS.put(names[i], new Color(rgb[i]));
+        }
+    }
 
     /**
      * Factory method to get the canvas singleton object.
@@ -111,37 +146,18 @@ public class Canvas{
 
     /**
      * Set the foreground colour of the Canvas.
-     * @param  newColour   the new colour for the foreground of the Canvas 
+     * Accepts CSS color names (case insensitive, e.g. "skyBlue") or
+     * hexadecimal colors (e.g. "#FF7F50"). Unknown names are drawn in
+     * black.
+     * @param  colorString   the new colour for the foreground of the Canvas 
      */
     public void setForegroundColor(String colorString){
-        if(colorString.equals("red"))
-            graphic.setColor(Color.red);
-        else if(colorString.equals("black"))
-            graphic.setColor(Color.black);
-        else if(colorString.equals("blue"))
-            graphic.setColor(Color.blue);
-        else if(colorString.equals("yellow"))
-            graphic.setColor(Color.yellow);
-        else if(colorString.equals("green"))
-            graphic.setColor(Color.green);
-        else if(colorString.equals("magenta"))
-            graphic.setColor(Color.magenta);
-        else if(colorString.equals("white"))
-            graphic.setColor(Color.white);
-        else if(colorString.equals("orange"))
-            graphic.setColor(Color.orange);
-        else if(colorString.equals("pink"))
-            graphic.setColor(Color.pink);
-        else if(colorString.equals("cyan"))
-            graphic.setColor(Color.cyan);
-        else if(colorString.equals("gray"))
-            graphic.setColor(Color.gray);
-        else if(colorString.equals("darkGray"))
-            graphic.setColor(Color.darkGray);
-        else if(colorString.equals("lightGray"))
-            graphic.setColor(Color.lightGray);
-        else if (colorString.startsWith("#")) 
+        if (colorString.startsWith("#")) {
             graphic.setColor(Color.decode(colorString));
+        } else {
+            Color color = COLORS.get(colorString.toLowerCase());
+            graphic.setColor(color != null ? color : Color.black);
+        }
     }
 
     /**
